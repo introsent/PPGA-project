@@ -166,6 +166,7 @@ void Game::Run()
 				break;
 			case SDL_MOUSEBUTTONUP:
 				m_IsDrifting = false;
+				m_CarUPtr->SetStartedRotating(false);
 				e.button.y = int(m_Window.height) - e.button.y;
 				this->ProcessMouseUpEvent(e.button);
 				break;

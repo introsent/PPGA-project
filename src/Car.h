@@ -18,11 +18,12 @@ public:
 
 	void RotateLookAt(ThreeBlade orbitPoint);
 
-	//void SetRotating(bool isRotating);
+	void SetStartedRotating(bool isRotating);
 
 private:
 	ThreeBlade m_Position;
 	TwoBlade m_ForwardTwoBlade;
+	TwoBlade m_LineToOrbitAround;
 	float m_Speed;
 
 	float m_Width;
@@ -30,6 +31,8 @@ private:
 	std::vector<Point2f> m_CarPoints;
 	Color4f m_Color;
 
-	bool m_IsRotating = false;
+
+
+	bool m_StartedRotating = false;
 };
 
