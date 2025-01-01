@@ -59,7 +59,7 @@ void Car::Orbit(float elapsedSec, ThreeBlade orbitPoint)
 	TwoBlade originToOrbitPoint = TwoBlade(orbitPoint[0], orbitPoint[1], orbitPoint[2], 0.f, 0.f, 0.f);
 	float distance = originToOrbitPoint.VNorm();
 
-	TwoBlade carToOrbitPoint = TwoBlade(m_CarPoints[0].x - orbitPoint[0], m_CarPoints[0].y - orbitPoint[0], 0.f, 0.f, 0.f, 0.f);
+	TwoBlade carToOrbitPoint = TwoBlade(m_CarPoints[0].x - orbitPoint[0], m_CarPoints[0].y - orbitPoint[1], 0.f, 0.f, 0.f, 0.f);
 	carToOrbitPoint /= carToOrbitPoint.VNorm();
 
 	auto perpDot = m_ForwardTwoBlade[0] * carToOrbitPoint[1] - m_ForwardTwoBlade[1] * carToOrbitPoint[0];
