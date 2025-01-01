@@ -54,14 +54,22 @@ void Car::DecreaseSpeed()
 	m_Speed -= 50.f;
 }
 
+float Car::DetermineAngularVelocity(TwoBlade& radiusTwoBlade)
+{
+	float radius = radiusTwoBlade.VNorm();
+	return m_Speed / radius;
+}
+
 void Car::Orbit(float elapsedSec, ThreeBlade orbitPoint)
 {
 	TwoBlade originToOrbitPoint = TwoBlade(orbitPoint[0], orbitPoint[1], orbitPoint[2], 0.f, 0.f, 0.f);
 	float distance = originToOrbitPoint.VNorm();
 
 	TwoBlade carToOrbitPoint = TwoBlade(m_CarPoints[0].x - orbitPoint[0], m_CarPoints[0].y - orbitPoint[1], 0.f, 0.f, 0.f, 0.f);
+	float angularVelocity = DetermineAngularVelocity(carToOrbitPoint);
 	carToOrbitPoint /= carToOrbitPoint.VNorm();
 
+	//Perpendicular dot
 	auto perpDot = m_ForwardTwoBlade[0] * carToOrbitPoint[1] - m_ForwardTwoBlade[1] * carToOrbitPoint[0];
 
 
@@ -82,8 +90,8 @@ void Car::Orbit(float elapsedSec, ThreeBlade orbitPoint)
 	}
 	
 
-	//TwoBlade rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, 1.f);
-	Motor rotation = Motor::Rotation(2.f, m_LineToOrbitAround);
+	
+	Motor rotation = Motor::Rotation(angularVelocity, m_LineToOrbitAround);
 
 	Motor translator = Motor::Translation(distance, originToOrbitPoint);
 

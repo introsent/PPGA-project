@@ -13,12 +13,14 @@ public:
 
 	void IncreaseSpeed();
 	void DecreaseSpeed();
+	float DetermineAngularVelocity(TwoBlade& radiusTwoBlade);
 
 	void Orbit(float elapsedSec, ThreeBlade orbitPoint);
 
 	void RotateLookAt(ThreeBlade orbitPoint);
 
 	void SetStartedRotating(bool isRotating);
+
 
 private:
 	ThreeBlade m_Position;
