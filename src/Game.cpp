@@ -167,6 +167,7 @@ void Game::Run()
 			case SDL_MOUSEBUTTONUP:
 				m_IsDrifting = false;
 				m_CarUPtr->SetStartedRotating(false);
+				m_CarUPtr->Snap();
 				e.button.y = int(m_Window.height) - e.button.y;
 				this->ProcessMouseUpEvent(e.button);
 				break;
@@ -223,11 +224,6 @@ void Game::Update(float elapsedSec)
 	{
 		m_CarUPtr->Update(elapsedSec);
 	}
-
-	
-	//Motor translator = Motor::Translation(m_TranslationSpeed * elapsedSec, TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f));
-	////1.f - 0.5f * planeForRot * OneBlade(-1.f, 0.f, 0.f, 0.f);
-	//m_InitPos = (translator * m_InitPos * ~translator).Grade3();
 }
 
 void Game::Draw() const
@@ -236,17 +232,4 @@ void Game::Draw() const
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	m_CarUPtr->Draw();
-
-	//utils::SetColor(Color4f(1.f, 1.f, 1.f, 1.f));
-	//utils::FillRect(m_InitPos[0], m_InitPos[1], 20.f, 100.f);
-
-	//OneBlade planeForRot{ 0.f, 1 / sqrtf(3), 0.f, 0.f };
-
-
-	//initPos += m;
-	//utils::SetColor(Color4f(0.f, 1.f, 0.f, 1.f));
-	//utils::FillRect(m[11], m[12], 100.f, 100.f);
-	////Rectf rect{ movement, rectBone.y, 50.f, 50.f };
-	
-
 }

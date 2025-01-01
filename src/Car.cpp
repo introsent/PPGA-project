@@ -116,3 +116,25 @@ void Car::SetStartedRotating(bool isRotating)
 	m_StartedRotating = isRotating;
 }
 
+void Car::Snap()
+{
+	TwoBlade up =	 TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f);
+	TwoBlade right = TwoBlade(1.f, 0.f, 0.f, 0.f, 0.f, 0.f);
+	TwoBlade down =  TwoBlade(0.f, -1.f, 0.f, 0.f, 0.f, 0.f);
+	TwoBlade left = TwoBlade(-1.f, 0.f, 0.f, 0.f, 0.f, 0.f);
+
+	std::vector<TwoBlade> directions = { up, right, down, left };
+
+	float maxDot = -std::numeric_limits<float>::infinity();
+	TwoBlade closestDirection = directions[0];
+
+	for (const auto& direction : directions) {
+		float dotProduct = m_ForwardTwoBlade[0] * direction[0] + m_ForwardTwoBlade[1] * direction[1];
+		if (dotProduct > maxDot) {
+			maxDot = dotProduct;
+			closestDirection = direction;
+		}
+	}
+	m_ForwardTwoBlade = closestDirection;
+}
+

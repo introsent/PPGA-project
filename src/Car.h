@@ -21,6 +21,8 @@ public:
 
 	void SetStartedRotating(bool isRotating);
 
+	void Snap();
+
 
 private:
 	ThreeBlade m_Position;
