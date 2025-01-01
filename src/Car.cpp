@@ -1,6 +1,6 @@
 #include "Car.h"
 #include "utils.h"
-
+#include <numbers>
 Car::Car(ThreeBlade startPos, TwoBlade forwardTwoBlade, float speed) : m_Position(startPos), m_ForwardTwoBlade(forwardTwoBlade), m_Speed(speed)
 {
 	m_Width  = 15.f;
@@ -135,6 +135,36 @@ void Car::Snap()
 			closestDirection = direction;
 		}
 	}
+
+	//Perpendicular dot
+	auto perpDot = m_ForwardTwoBlade[0] * closestDirection[1] - m_ForwardTwoBlade[1] * closestDirection[0];
+
+	TwoBlade rotationLine;
+	if (perpDot > 0)
+	{
+		rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, -1.f);
+	}
+	else if (perpDot < 0)
+	{
+		rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, 1.f);
+	}
+
+	float rotationAngle = acosf(maxDot) * 180.f / std::numbers::pi;
+	Motor rotation = Motor::Rotation(rotationAngle, rotationLine);
+
+	TwoBlade originToRotationPoint = TwoBlade(m_CarPoints[0].x, m_CarPoints[0].y, 0.f, 0.f, 0.f, 0.f);
+	float distance = originToRotationPoint.VNorm();
+	
+	Motor translator = Motor::Translation(distance, originToRotationPoint);
+
+	Motor rotor = (translator * rotation * ~translator);
+
+	for (Point2f& pos : m_CarPoints)
+	{
+		ThreeBlade position = (rotor * ThreeBlade(pos.x, pos.y, 0.f) * ~rotor).Grade3();
+		pos = Point2f(position[0], position[1]);
+	}
+
 	m_ForwardTwoBlade = closestDirection;
 }
 
