@@ -168,3 +168,9 @@ void Car::Snap()
 	m_ForwardTwoBlade = closestDirection;
 }
 
+
+std::vector<Point2f>& Car::GetCarPositions()
+{
+	return m_CarPoints;
+}
+

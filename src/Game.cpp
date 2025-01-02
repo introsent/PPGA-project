@@ -103,7 +103,89 @@ void Game::InitializeGameEngine()
 
 	m_Initialized = true;
 
-	m_CarUPtr = std::make_unique<Car>(ThreeBlade(100.f, 200.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 0.f);
+	m_CarUPtr = std::make_unique<Car>(ThreeBlade(360.f, 200.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 0.f);
+
+	//Left of the road
+	m_MapPoints.emplace_back(132.f, 50.f);
+	m_MapPoints.emplace_back(132.f, 189.f);
+	m_MapPoints.emplace_back(193.f, 265.f);
+	m_MapPoints.emplace_back(306.f, 288.f);
+	m_MapPoints.emplace_back(375.f, 373.f);
+	m_MapPoints.emplace_back(355.f, 455.f);
+	m_MapPoints.emplace_back(130.f, 443.f);
+	m_MapPoints.emplace_back(50.f, 1000.f - 458.f);
+	m_MapPoints.emplace_back(92.f, 1000.f - 340.f);
+	m_MapPoints.emplace_back(295.f, 1000.f - 320.f);
+	m_MapPoints.emplace_back(470.f, 1000.f - 390.f); 
+	m_MapPoints.emplace_back(510.f, 1000.f - 465.f);
+	m_MapPoints.emplace_back(526.f, 1000.f - 604.f);
+	m_MapPoints.emplace_back(535.f, 1000.f - 771.f);
+	m_MapPoints.emplace_back(560.f, 1000.f - 803.f);
+	m_MapPoints.emplace_back(632.f, 1000.f - 792.f);
+	m_MapPoints.emplace_back(625.f, 1000.f - 637.f);
+	m_MapPoints.emplace_back(640.f, 1000.f - 535.f);
+	m_MapPoints.emplace_back(700.f, 1000.f - 470.f);
+	m_MapPoints.emplace_back(795.f, 1000.f - 475.f);
+	m_MapPoints.emplace_back(871.f, 1000.f - 497.f);
+	m_MapPoints.emplace_back(922.f, 1000.f - 568.f);
+	m_MapPoints.emplace_back(944.f, 1000.f - 660.f);
+	m_MapPoints.emplace_back(944.f, 1000.f - 950.f);
+
+	//Right of the road
+	m_MapPoints.emplace_back(865.f, 1000.f - 950.f);
+	m_MapPoints.emplace_back(865.f, 1000.f - 755.f);
+	m_MapPoints.emplace_back(850.f, 1000.f - 600.f);
+	m_MapPoints.emplace_back(820.f, 1000.f - 560.f);
+	m_MapPoints.emplace_back(755.f, 1000.f - 545.f);
+	m_MapPoints.emplace_back(715.f, 1000.f - 560.f);
+	m_MapPoints.emplace_back(700.f, 1000.f - 655.f);
+	m_MapPoints.emplace_back(700.f, 1000.f - 755.f);
+	m_MapPoints.emplace_back(694.f, 1000.f - 823.f);
+	m_MapPoints.emplace_back(640.f, 1000.f - 860.f);
+	m_MapPoints.emplace_back(542.f, 1000.f - 860.f);
+	m_MapPoints.emplace_back(472.f, 1000.f - 820.f);
+	m_MapPoints.emplace_back(462.f, 1000.f - 620.f);
+	m_MapPoints.emplace_back(430.f, 1000.f - 460.f);
+	m_MapPoints.emplace_back(375.f, 1000.f - 400.f);
+	m_MapPoints.emplace_back(225.f, 1000.f - 380.f);
+	m_MapPoints.emplace_back(125.f, 1000.f - 407.f);
+	m_MapPoints.emplace_back(140.f, 1000.f - 485.f);
+	m_MapPoints.emplace_back(280.f, 1000.f - 485.f);
+	m_MapPoints.emplace_back(380.f, 1000.f - 495.f);
+	m_MapPoints.emplace_back(430.f, 1000.f - 535.f);
+	m_MapPoints.emplace_back(435.f, 1000.f - 655.f);
+	m_MapPoints.emplace_back(395.f, 1000.f - 735.f);
+	m_MapPoints.emplace_back(240.f, 1000.f - 795.f);
+	m_MapPoints.emplace_back(215.f, 1000.f - 820.f);
+	m_MapPoints.emplace_back(210.f, 1000.f - 950.f);
+
+	for (Point2f& point : m_MapPoints)
+	{
+		point.x *= 2.f;
+		point.y *= 2.f;
+	}
+
+
+
+	//m_MapPoints.emplace_back(43.0f, 60.0f);
+	//m_MapPoints.emplace_back(143.0f, 60.0f);
+	//m_MapPoints.emplace_back(243.0f, 110.0f);
+	//m_MapPoints.emplace_back(293.0f, 210.0f);
+	//m_MapPoints.emplace_back(243.0f, 310.0f);
+	//m_MapPoints.emplace_back(143.0f, 360.0f);
+	//m_MapPoints.emplace_back(93.0f, 310.0f);
+	//m_MapPoints.emplace_back(43.0f, 210.0f);
+	//
+	//// Right edge points
+	//m_MapPoints.emplace_back(57.0f, 40.0f);
+	//m_MapPoints.emplace_back(157.0f, 40.0f);
+	//m_MapPoints.emplace_back(257.0f, 90.0f);
+	//m_MapPoints.emplace_back(307.0f, 190.0f);
+	//m_MapPoints.emplace_back(257.0f, 290.0f);
+	//m_MapPoints.emplace_back(157.0f, 340.0f);
+	//m_MapPoints.emplace_back(107.0f, 290.0f);
+	//m_MapPoints.emplace_back(57.0f, 190.0f);
+
 }
 
 void Game::Run()
@@ -135,6 +217,10 @@ void Game::Run()
 				quit = true;
 				break;
 			case SDL_KEYDOWN:
+				if (e.key.keysym.sym == SDLK_SPACE)
+				{
+					m_CarUPtr->Snap();
+				}
 				this->ProcessKeyDownEvent(e.key);
 				break;
 			case SDL_KEYUP:
@@ -167,7 +253,6 @@ void Game::Run()
 			case SDL_MOUSEBUTTONUP:
 				m_IsDrifting = false;
 				m_CarUPtr->SetStartedRotating(false);
-				m_CarUPtr->Snap();
 				e.button.y = int(m_Window.height) - e.button.y;
 				this->ProcessMouseUpEvent(e.button);
 				break;
@@ -232,4 +317,10 @@ void Game::Draw() const
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	m_CarUPtr->Draw();
+
+	utils::SetColor(Color4f(0.7f, 0.7f, 0.7f, 1.f));
+
+	utils::DrawPolygon(m_MapPoints);
+
+	//utils::
 }

@@ -55,6 +55,11 @@ private:
 	// DATA MEMBERS
 	std::unique_ptr<Car> m_CarUPtr;
 
+	std::vector<Point2f> m_MapPointsRight;
+	std::vector<Point2f> m_MapPointsLeft;
+
+	std::vector<Point2f> m_MapPoints;
+
 	bool m_IsDrifting = false;
 	ThreeBlade m_OrbitPoint;
 

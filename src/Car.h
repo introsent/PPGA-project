@@ -23,6 +23,8 @@ public:
 
 	void Snap();
 
+	std::vector<Point2f>& GetCarPositions();
+
 
 private:
 	ThreeBlade m_Position;
