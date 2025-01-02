@@ -142,17 +142,17 @@ void Car::Snap()
 	TwoBlade rotationLine;
 	if (perpDot > 0)
 	{
-		rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, -1.f);
+		rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, 1.f);
 	}
 	else if (perpDot < 0)
 	{
-		rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, 1.f);
+		rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, -1.f);
 	}
 
-	float rotationAngle = acosf(maxDot) * 180.f / std::numbers::pi;
+	float rotationAngle = acosf(maxDot) * 180.f / float(std::numbers::pi);
 	Motor rotation = Motor::Rotation(rotationAngle, rotationLine);
 
-	TwoBlade originToRotationPoint = TwoBlade(m_CarPoints[0].x, m_CarPoints[0].y, 0.f, 0.f, 0.f, 0.f);
+	TwoBlade originToRotationPoint = TwoBlade((m_CarPoints[0].x + m_CarPoints[2].x) / 2.f, (m_CarPoints[0].y + m_CarPoints[2].y) / 2.f, 0.f, 0.f, 0.f, 0.f);
 	float distance = originToRotationPoint.VNorm();
 	
 	Motor translator = Motor::Translation(distance, originToRotationPoint);
