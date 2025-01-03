@@ -25,6 +25,10 @@ public:
 
 	std::vector<Point2f>& GetCarPositions();
 
+	void CheckIntersectionWithMapBorders(const TwoBlade& border, const ThreeBlade& startPos, const ThreeBlade& endPos);
+
+	void Reflect();
+
 
 private:
 	ThreeBlade m_Position;

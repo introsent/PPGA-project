@@ -7,7 +7,7 @@
 #include "Game.h"
 #include "utils.h"
 #include "structs.h"
-#include "FlyFish.h";
+#include "FlyFish.h"
 
 Game::Game(const Window& window)
 	: m_Window{ window }
@@ -244,7 +244,7 @@ void Game::Run()
 				m_IsDrifting = true;
 				if (m_IsDrifting)
 				{
-					m_OrbitPoint = ThreeBlade(e.button.x, e.button.y, 0.f);
+					m_OrbitPoint = ThreeBlade(float(e.button.x), float(e.button.y), 0.f);
 				}
 				
 				//m_CarUPtr->Rotate(ThreeBlade(e.button.x, e.button.y, 0.f));
@@ -309,6 +309,19 @@ void Game::Update(float elapsedSec)
 	{
 		m_CarUPtr->Update(elapsedSec);
 	}
+
+	for (int i = 0; i < m_MapPoints.size(); ++i)
+	{
+		ThreeBlade point1 = ThreeBlade(m_MapPoints[i % m_MapPoints.size()].x, m_MapPoints[i % m_MapPoints.size()].y, 0.f);
+		ThreeBlade point2 = ThreeBlade(m_MapPoints[(i + 1) % m_MapPoints.size()].x, m_MapPoints[(i + 1) % m_MapPoints.size()].y, 0.f);
+
+		TwoBlade borderTwoBlade = TwoBlade::LineFromPoints(point1[0], point1[1], point1[2], point2[0], point2[1], point2[2]);
+		//borderTwoBlade[2] = 0;
+
+		m_CarUPtr->CheckIntersectionWithMapBorders(borderTwoBlade, point1, point2);
+	}
+
+	std::cout << "--END_OF_LOOP--" << std::endl;
 }
 
 void Game::Draw() const

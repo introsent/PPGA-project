@@ -1,6 +1,7 @@
 #include "Car.h"
 #include "utils.h"
 #include <numbers>
+#include <iostream>
 Car::Car(ThreeBlade startPos, TwoBlade forwardTwoBlade, float speed) : m_Position(startPos), m_ForwardTwoBlade(forwardTwoBlade), m_Speed(speed)
 {
 	m_Width  = 15.f;
@@ -172,5 +173,53 @@ void Car::Snap()
 std::vector<Point2f>& Car::GetCarPositions()
 {
 	return m_CarPoints;
+}
+
+void Car::CheckIntersectionWithMapBorders(const TwoBlade& border, const ThreeBlade& startPos, const ThreeBlade& endPos)
+{
+	for (int i = 0; i < m_CarPoints.size(); ++i)
+	{
+		ThreeBlade point1 = ThreeBlade(m_CarPoints[i % m_CarPoints.size()].x, m_CarPoints[i % m_CarPoints.size()].y, 0.f);
+		ThreeBlade point2 = ThreeBlade(m_CarPoints[(i + 1) % m_CarPoints.size()].x, m_CarPoints[(i + 1) % m_CarPoints.size()].y, 0.f);
+
+		TwoBlade curTwoBlade = TwoBlade::LineFromPoints(point1[0], point1[1], point1[2], point2[0], point2[1], point2[2]);
+		//curTwoBlade[2] = 0;
+
+		TwoBlade curTwoBladeVanishingToEuclidean = ThreeBlade(curTwoBlade[3], curTwoBlade[4], curTwoBlade[5])  & ThreeBlade(0.f, 0.f, 0.f);
+		TwoBlade borderTwoBladeVanishingToEuclidean = ThreeBlade(border[3], border[4], border[5]) & ThreeBlade(0.f, 0.f, 0.f);
+
+		ThreeBlade skewTest = (curTwoBladeVanishingToEuclidean ^ borderTwoBladeVanishingToEuclidean).Grade3();
+
+		ThreeBlade point;
+
+		if (skewTest == ThreeBlade(0.f, 0.f, 0.f, 0.f))
+		{
+			TwoBlade commonNormal = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, 1.f);					//(curTwoBlade * border).Grade2();
+			ThreeBlade NPoint = commonNormal ^ OneBlade::OneBlade(1.f, 0.f, 0.f, 0.f);
+			
+			OneBlade commonPlane = NPoint & curTwoBlade;
+
+			point = (commonPlane ^ border).Normalize();
+		}
+
+		std::cout << point.toString() << std::endl;
+
+		if (
+			(std::min(point1[0], point2[0]) <= point[0] && point[0] <= std::max(point1[0], point2[0]) &&
+			std::min(point1[1], point2[1]) <= point[1] && point[1] <= std::max(point1[1], point2[1]))
+			&&
+			(std::min(startPos[0], endPos[0]) <= point[0] && point[0] <= std::max(startPos[0], endPos[0]) &&
+			std::min(startPos[1], endPos[1]) <= point[1] && point[1] <= std::max(startPos[1], endPos[1]))
+
+			)
+		{
+			Reflect();
+		}
+	}
+}
+
+void Car::Reflect()
+{
+	//reflection logic
 }
 
