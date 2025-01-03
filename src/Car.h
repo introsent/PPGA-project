@@ -15,9 +15,9 @@ public:
 	void DecreaseSpeed();
 	float DetermineAngularVelocity(TwoBlade& radiusTwoBlade);
 
-	void Orbit(float elapsedSec, ThreeBlade orbitPoint);
+	void Orbit(ThreeBlade orbitPoint);
 
-	void RotateLookAt(ThreeBlade orbitPoint);
+	void RotateLookAt();
 
 	void SetStartedRotating(bool isRotating);
 
@@ -27,12 +27,14 @@ public:
 
 	void CheckIntersectionWithMapBorders(const TwoBlade& border, const ThreeBlade& startPos, const ThreeBlade& endPos);
 
-	void Reflect();
+	void Bounce(const ThreeBlade& hitPos, const TwoBlade& borderVector);
 
 
 private:
 	ThreeBlade m_Position;
 	TwoBlade m_ForwardTwoBlade;
+	TwoBlade m_SideForceTwoBlade;
+
 	TwoBlade m_LineToOrbitAround;
 	float m_Speed;
 
@@ -41,7 +43,7 @@ private:
 	std::vector<Point2f> m_CarPoints;
 	Color4f m_Color;
 
-
+	float m_TimeBouncing = 0.f;
 
 	bool m_StartedRotating = false;
 };

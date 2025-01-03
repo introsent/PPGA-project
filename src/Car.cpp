@@ -16,14 +16,28 @@ Car::Car(ThreeBlade startPos, TwoBlade forwardTwoBlade, float speed) : m_Positio
 
 void Car::Update(float elapsedSec)
 {
-	Motor translator = Motor::Translation(m_Speed * elapsedSec, m_ForwardTwoBlade);
-
-	for (Point2f& pos : m_CarPoints)
+	if (m_TimeBouncing > 0.f)
 	{
-		ThreeBlade position = (translator * ThreeBlade(pos.x, pos.y, 0.f) * ~translator).Grade3();
-		pos = Point2f(position[0], position[1]);
+		Motor sideTranslator = Motor::Translation(m_Speed * elapsedSec, m_SideForceTwoBlade);
+
+		for (Point2f& pos : m_CarPoints)
+		{
+			ThreeBlade position = (sideTranslator * ThreeBlade(pos.x, pos.y, 0.f) * ~sideTranslator).Grade3();
+			pos = Point2f(position[0], position[1]);
+		}
+
+		m_TimeBouncing -= elapsedSec;
+	} 
+	else
+	{
+		Motor forwardTranslator = Motor::Translation(m_Speed * elapsedSec, m_ForwardTwoBlade);
+
+		for (Point2f& pos : m_CarPoints)
+		{
+			ThreeBlade position = (forwardTranslator * ThreeBlade(pos.x, pos.y, 0.f) * ~forwardTranslator).Grade3();
+			pos = Point2f(position[0], position[1]);
+		}
 	}
-	//m_Position = (translator * m_Position * ~translator).Grade3();
 }
 
 void Car::Draw()
@@ -61,7 +75,7 @@ float Car::DetermineAngularVelocity(TwoBlade& radiusTwoBlade)
 	return m_Speed / radius;
 }
 
-void Car::Orbit(float elapsedSec, ThreeBlade orbitPoint)
+void Car::Orbit(ThreeBlade orbitPoint)
 {
 	TwoBlade originToOrbitPoint = TwoBlade(orbitPoint[0], orbitPoint[1], orbitPoint[2], 0.f, 0.f, 0.f);
 	float distance = originToOrbitPoint.VNorm();
@@ -106,7 +120,7 @@ void Car::Orbit(float elapsedSec, ThreeBlade orbitPoint)
 	
 }
 
-void Car::RotateLookAt(ThreeBlade orbitPoint)
+void Car::RotateLookAt()
 {
 	m_ForwardTwoBlade = TwoBlade(m_CarPoints[1].x - m_CarPoints[0].x, m_CarPoints[1].y - m_CarPoints[0].y, 0.f, 0.f, 0.f, 0.f);
 	m_ForwardTwoBlade /= m_ForwardTwoBlade.VNorm();
@@ -183,26 +197,22 @@ void Car::CheckIntersectionWithMapBorders(const TwoBlade& border, const ThreeBla
 		ThreeBlade point2 = ThreeBlade(m_CarPoints[(i + 1) % m_CarPoints.size()].x, m_CarPoints[(i + 1) % m_CarPoints.size()].y, 0.f);
 
 		TwoBlade curTwoBlade = TwoBlade::LineFromPoints(point1[0], point1[1], point1[2], point2[0], point2[1], point2[2]);
-		//curTwoBlade[2] = 0;
 
-		TwoBlade curTwoBladeVanishingToEuclidean = ThreeBlade(curTwoBlade[3], curTwoBlade[4], curTwoBlade[5])  & ThreeBlade(0.f, 0.f, 0.f);
-		TwoBlade borderTwoBladeVanishingToEuclidean = ThreeBlade(border[3], border[4], border[5]) & ThreeBlade(0.f, 0.f, 0.f);
+		TwoBlade curTwoBladeNoVanishing = ThreeBlade(curTwoBlade[3], curTwoBlade[4], curTwoBlade[5])  & ThreeBlade(0.f, 0.f, 0.f);
+		TwoBlade borderTwoBladeNoVanishing = ThreeBlade(border[3], border[4], border[5]) & ThreeBlade(0.f, 0.f, 0.f);
 
-		ThreeBlade skewTest = (curTwoBladeVanishingToEuclidean ^ borderTwoBladeVanishingToEuclidean).Grade3();
+		ThreeBlade skewTest = (curTwoBladeNoVanishing ^ borderTwoBladeNoVanishing).Grade3();
 
 		ThreeBlade point;
 
 		if (skewTest == ThreeBlade(0.f, 0.f, 0.f, 0.f))
 		{
-			TwoBlade commonNormal = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, 1.f);					//(curTwoBlade * border).Grade2();
+			TwoBlade commonNormal = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, 1.f);	
 			ThreeBlade NPoint = commonNormal ^ OneBlade::OneBlade(1.f, 0.f, 0.f, 0.f);
-			
 			OneBlade commonPlane = NPoint & curTwoBlade;
 
 			point = (commonPlane ^ border).Normalize();
 		}
-
-		std::cout << point.toString() << std::endl;
 
 		if (
 			(std::min(point1[0], point2[0]) <= point[0] && point[0] <= std::max(point1[0], point2[0]) &&
@@ -213,13 +223,25 @@ void Car::CheckIntersectionWithMapBorders(const TwoBlade& border, const ThreeBla
 
 			)
 		{
-			Reflect();
+			Bounce(point, border);
+			break;
 		}
 	}
 }
 
-void Car::Reflect()
+void Car::Bounce(const ThreeBlade& hitPos, const TwoBlade& borderVector)
 {
-	//reflection logic
+	if (m_Speed > 0)
+	{
+		DecreaseSpeed();
+	}
+	RotateLookAt();
+
+	m_SideForceTwoBlade = m_ForwardTwoBlade;
+	
+	auto reflector = borderVector * m_SideForceTwoBlade * ~borderVector;
+	m_SideForceTwoBlade = reflector.Grade2();
+
+	m_TimeBouncing = 1.f;
 }
 
