@@ -16,6 +16,12 @@ Car::Car(ThreeBlade startPos, TwoBlade forwardTwoBlade, float speed) : m_Positio
 
 void Car::Update(float elapsedSec)
 {
+	UpdateSideForce(elapsedSec);
+	UpdateForwardForce(elapsedSec);
+}
+
+void Car::UpdateSideForce(float elapsedSec)
+{
 	if (m_TimeBouncing > 0.f)
 	{
 		Motor sideTranslator = Motor::Translation(m_Speed * elapsedSec, m_SideForceTwoBlade);
@@ -27,8 +33,12 @@ void Car::Update(float elapsedSec)
 		}
 
 		m_TimeBouncing -= elapsedSec;
-	} 
-	else
+	}
+}
+
+void Car::UpdateForwardForce(float elapsedSec)
+{
+	if (m_TimeBouncing <= 0.f)
 	{
 		Motor forwardTranslator = Motor::Translation(m_Speed * elapsedSec, m_ForwardTwoBlade);
 
@@ -77,46 +87,50 @@ float Car::DetermineAngularVelocity(TwoBlade& radiusTwoBlade)
 
 void Car::Orbit(ThreeBlade orbitPoint)
 {
-	TwoBlade originToOrbitPoint = TwoBlade(orbitPoint[0], orbitPoint[1], orbitPoint[2], 0.f, 0.f, 0.f);
-	float distance = originToOrbitPoint.VNorm();
-
-	TwoBlade carToOrbitPoint = TwoBlade(m_CarPoints[0].x - orbitPoint[0], m_CarPoints[0].y - orbitPoint[1], 0.f, 0.f, 0.f, 0.f);
-	float angularVelocity = DetermineAngularVelocity(carToOrbitPoint);
-	carToOrbitPoint /= carToOrbitPoint.VNorm();
-
-	//Perpendicular dot
-	auto perpDot = m_ForwardTwoBlade[0] * carToOrbitPoint[1] - m_ForwardTwoBlade[1] * carToOrbitPoint[0];
-
-
-	if (!m_StartedRotating)
+	if (m_TimeBouncing <= 0.f)
 	{
-		TwoBlade rotationLine;
-		if (perpDot > 0)
+		TwoBlade originToOrbitPoint = TwoBlade(orbitPoint[0], orbitPoint[1], orbitPoint[2], 0.f, 0.f, 0.f);
+		float distance = originToOrbitPoint.VNorm();
+
+		TwoBlade carToOrbitPoint = TwoBlade(m_CarPoints[0].x - orbitPoint[0], m_CarPoints[0].y - orbitPoint[1], 0.f, 0.f, 0.f, 0.f);
+		float angularVelocity = DetermineAngularVelocity(carToOrbitPoint);
+		carToOrbitPoint /= carToOrbitPoint.VNorm();
+
+		//Perpendicular dot
+		auto perpDot = m_ForwardTwoBlade[0] * carToOrbitPoint[1] - m_ForwardTwoBlade[1] * carToOrbitPoint[0];
+
+
+		if (!m_StartedRotating)
 		{
-			rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, -1.f);
-		}
-		else if (perpDot < 0)
-		{
-			rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, 1.f);
+			TwoBlade rotationLine;
+			if (perpDot > 0)
+			{
+				rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, -1.f);
+			}
+			else if (perpDot < 0)
+			{
+				rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, 1.f);
+			}
+
+			m_LineToOrbitAround = rotationLine;
+			m_StartedRotating = true;
 		}
 
-		m_LineToOrbitAround = rotationLine;
-		m_StartedRotating = true;
+
+
+		Motor rotation = Motor::Rotation(angularVelocity, m_LineToOrbitAround);
+
+		Motor translator = Motor::Translation(distance, originToOrbitPoint);
+
+		Motor rotor = (translator * rotation * ~translator);
+
+		for (Point2f& pos : m_CarPoints)
+		{
+			ThreeBlade position = (rotor * ThreeBlade(pos.x, pos.y, 0.f) * ~rotor).Grade3();
+			pos = Point2f(position[0], position[1]);
+		}
 	}
 	
-
-	
-	Motor rotation = Motor::Rotation(angularVelocity, m_LineToOrbitAround);
-
-	Motor translator = Motor::Translation(distance, originToOrbitPoint);
-
-	Motor rotor = (translator * rotation * ~translator);
-
-	for (Point2f& pos : m_CarPoints)
-	{
-		ThreeBlade position = (rotor * ThreeBlade(pos.x, pos.y, 0.f) * ~rotor).Grade3();
-		pos = Point2f(position[0], position[1]);
-	}
 	
 }
 
@@ -231,7 +245,7 @@ void Car::CheckIntersectionWithMapBorders(const TwoBlade& border, const ThreeBla
 
 void Car::Bounce(const ThreeBlade& hitPos, const TwoBlade& borderVector)
 {
-	if (m_Speed > 0)
+	if (m_Speed > 50)
 	{
 		DecreaseSpeed();
 	}
@@ -242,6 +256,6 @@ void Car::Bounce(const ThreeBlade& hitPos, const TwoBlade& borderVector)
 	auto reflector = borderVector * m_SideForceTwoBlade * ~borderVector;
 	m_SideForceTwoBlade = reflector.Grade2();
 
-	m_TimeBouncing = 1.f;
+	m_TimeBouncing = 0.5f;
 }
 

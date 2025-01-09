@@ -314,10 +314,12 @@ void Game::Update(float elapsedSec)
 	{
 		m_CarUPtr->Orbit(m_OrbitPoint);
 		m_CarUPtr->RotateLookAt();
+		m_CarUPtr->UpdateSideForce(elapsedSec);
 	}
 	else
 	{
-		m_CarUPtr->Update(elapsedSec);
+		m_CarUPtr->UpdateSideForce(elapsedSec);
+		m_CarUPtr->UpdateForwardForce(elapsedSec);
 	}
 
 	

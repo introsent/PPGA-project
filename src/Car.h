@@ -9,6 +9,9 @@ public:
 
 	void Update(float elapsedSec);
 
+	void UpdateSideForce(float elapsedSec);
+	void UpdateForwardForce(float elapsedSec);
+
 	void Draw();
 
 	void IncreaseSpeed();
