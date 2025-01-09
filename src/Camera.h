@@ -14,6 +14,7 @@ public:
 	//void PopMatrix(); 
 
 	Point2f GetAppliedTransform(const Point2f& pointToTransform) const;
+	Point2f GetWorldLocation(const Point2f& pointInLocalSpace) const;
 	//const Motor& GetCurrentTransformation() const;
 
 

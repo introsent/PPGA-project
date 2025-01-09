@@ -29,7 +29,80 @@ Camera::Camera(float screenWidth, float screenHeight)
 Point2f Camera::GetAppliedTransform(const Point2f& pointToTransform) const
 {
 	ThreeBlade newPoint = (m_FinalTransform * ThreeBlade(pointToTransform.x, pointToTransform.y, 0.f) * ~m_FinalTransform).Grade3();
-	return Point2f(newPoint[0], newPoint[1]);
+
+	float x, y;
+
+	if (!std::isnan(newPoint[0]))
+	{
+		x = newPoint[0];
+	}
+	else
+	{
+		x = pointToTransform.x;
+	}
+
+	if (!std::isnan(newPoint[1]))
+	{
+		y = newPoint[1];
+	}
+	else
+	{
+		y = pointToTransform.y;
+	}
+
+	return Point2f(x, y);
+	//return pointToTransform;
+}
+
+Point2f Camera::GetWorldLocation(const Point2f& pointInLocalSpace) const
+{
+	//ThreeBlade newPoint = (-m_FinalTransform * ThreeBlade(pointInLocalSpace.x, pointInLocalSpace.y, 0.f) * ~(-m_FinalTransform)).Grade3();
+	float transformX, transformY;
+
+	if (!std::isnan(m_FinalTransform[1])) //m_FinalTransform[1] != m_FinalTransform[1]))
+	{
+		transformX = m_FinalTransform[1];
+	}
+	else
+	{
+		transformX = 0.f;
+	}
+
+	if (!std::isnan(m_FinalTransform[2]))
+	{
+		transformY = m_FinalTransform[2];
+	}
+	else
+	{
+		transformY = 0.f;
+	}
+
+	Motor translation = Motor(m_FinalTransform[0], -transformX, -transformY, m_FinalTransform[3], m_FinalTransform[4], m_FinalTransform[5], m_FinalTransform[6], m_FinalTransform[7]);
+
+	ThreeBlade result = (translation * ThreeBlade(pointInLocalSpace.x, pointInLocalSpace.y, 0.f) * ~translation).Grade3();
+
+
+	float x, y;
+
+
+	if (!std::isnan(result[0])) //m_FinalTransform[1] != m_FinalTransform[1]))
+	{
+		x = result[0];
+	}
+	else
+	{
+		x = pointInLocalSpace.x;
+	}
+
+	if (!std::isnan(result[1]))
+	{
+		y = result[1];
+	}
+	else
+	{
+		y = pointInLocalSpace.y;
+	}
+	return Point2f(x, y);
 }
 
 //Zconst Motor& Camera::GetCurrentTransformation() const

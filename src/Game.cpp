@@ -234,7 +234,7 @@ void Game::Run()
 			{
 				e.button.y = int(m_Window.height) - e.button.y;
 
-				Point2f clickPos = m_CameraUPtr->GetAppliedTransform(Point2f(float(e.button.x), float(e.button.y)));
+				Point2f clickPos = m_CameraUPtr->GetWorldLocation(Point2f(float(e.button.x), float(e.button.y)));
 
 				m_IsDrifting = true;
 				if (m_IsDrifting)
