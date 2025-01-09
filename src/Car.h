@@ -1,7 +1,7 @@
 #pragma once
 #include "FlyFish.h"
 #include "utils.h"
-
+#include "Camera.h"
 class Car
 {
 public:
@@ -11,6 +11,7 @@ public:
 
 	void UpdateSideForce(float elapsedSec);
 	void UpdateForwardForce(float elapsedSec);
+	void UpdateCarPointsLocalSpace(const Camera* cameraPtr);
 
 	void Draw();
 
@@ -26,11 +27,11 @@ public:
 
 	void Snap();
 
-	std::vector<Point2f>& GetCarPositions();
-
 	void CheckIntersectionWithMapBorders(const TwoBlade& border, const ThreeBlade& startPos, const ThreeBlade& endPos);
 
 	void Bounce(const ThreeBlade& hitPos, const TwoBlade& borderVector);
+
+	ThreeBlade GetCarWorldLocation() const;
 
 
 private:
@@ -44,6 +45,7 @@ private:
 	float m_Width;
 	float m_Height;
 	std::vector<Point2f> m_CarPoints;
+	std::vector<Point2f> m_CarPointsLocalSpace;
 	Color4f m_Color;
 
 	float m_TimeBouncing = 0.f;

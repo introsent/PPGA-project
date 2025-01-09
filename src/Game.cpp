@@ -166,25 +166,17 @@ void Game::InitializeGameEngine()
 	}
 
 
+	m_CameraUPtr = std::make_unique<Camera>(GetViewPort().width, GetViewPort().height);
 
-	//m_MapPoints.emplace_back(43.0f, 60.0f);
-	//m_MapPoints.emplace_back(143.0f, 60.0f);
-	//m_MapPoints.emplace_back(243.0f, 110.0f);
-	//m_MapPoints.emplace_back(293.0f, 210.0f);
-	//m_MapPoints.emplace_back(243.0f, 310.0f);
-	//m_MapPoints.emplace_back(143.0f, 360.0f);
-	//m_MapPoints.emplace_back(93.0f, 310.0f);
-	//m_MapPoints.emplace_back(43.0f, 210.0f);
-	//
-	//// Right edge points
-	//m_MapPoints.emplace_back(57.0f, 40.0f);
-	//m_MapPoints.emplace_back(157.0f, 40.0f);
-	//m_MapPoints.emplace_back(257.0f, 90.0f);
-	//m_MapPoints.emplace_back(307.0f, 190.0f);
-	//m_MapPoints.emplace_back(257.0f, 290.0f);
-	//m_MapPoints.emplace_back(157.0f, 340.0f);
-	//m_MapPoints.emplace_back(107.0f, 290.0f);
-	//m_MapPoints.emplace_back(57.0f, 190.0f);
+	auto maxXPoint = std::max_element(m_MapPoints.begin(), m_MapPoints.end(), [](const Point2f& a, const Point2f& b) {
+		return a.x < b.x;
+		});
+	m_MaxMapWidth = maxXPoint->x;
+
+	auto maxYPoint = std::max_element(m_MapPoints.begin(), m_MapPoints.end(), [](const Point2f& a, const Point2f& b) {
+		return a.y < b.y;
+		});
+	m_MaxMapHeight =  maxYPoint->y;
 
 }
 
@@ -239,17 +231,21 @@ void Game::Run()
 				this->ProcessMouseMotionEvent(e.motion);
 				break;
 			case SDL_MOUSEBUTTONDOWN:
+			{
 				e.button.y = int(m_Window.height) - e.button.y;
+
+				Point2f clickPos = m_CameraUPtr->GetAppliedTransform(Point2f(float(e.button.x), float(e.button.y)));
 
 				m_IsDrifting = true;
 				if (m_IsDrifting)
 				{
-					m_OrbitPoint = ThreeBlade(float(e.button.x), float(e.button.y), 0.f);
+					m_OrbitPoint = ThreeBlade(clickPos.x, clickPos.y, 0.f);
 				}
-				
+
 				//m_CarUPtr->Rotate(ThreeBlade(e.button.x, e.button.y, 0.f));
 				this->ProcessMouseDownEvent(e.button);
 				break;
+			}
 			case SDL_MOUSEBUTTONUP:
 				m_IsDrifting = false;
 				m_CarUPtr->SetStartedRotating(false);
@@ -322,6 +318,15 @@ void Game::Update(float elapsedSec)
 		m_CarUPtr->UpdateForwardForce(elapsedSec);
 	}
 
+	m_CameraUPtr->Aim(m_MaxMapWidth, m_MaxMapHeight, m_CarUPtr->GetCarWorldLocation());	
+
+	m_CarUPtr->UpdateCarPointsLocalSpace(m_CameraUPtr.get());
+
+	m_MapPointsLocalSpace.clear();
+	for (const Point2f& mapPoint : m_MapPoints)
+	{
+		m_MapPointsLocalSpace.push_back(m_CameraUPtr->GetAppliedTransform(mapPoint));
+	}
 	
 }
 
@@ -334,7 +339,5 @@ void Game::Draw() const
 
 	utils::SetColor(Color4f(0.7f, 0.7f, 0.7f, 1.f));
 
-	utils::DrawPolygon(m_MapPoints);
-
-	//utils::
+	utils::DrawPolygon(m_MapPointsLocalSpace);
 }

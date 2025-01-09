@@ -50,22 +50,32 @@ void Car::UpdateForwardForce(float elapsedSec)
 	}
 }
 
+void Car::UpdateCarPointsLocalSpace(const Camera* cameraPtr)
+{
+	m_CarPointsLocalSpace.clear();
+	for (const Point2f& carPoint : m_CarPoints)
+	{
+		m_CarPointsLocalSpace.push_back(cameraPtr->GetAppliedTransform(carPoint));
+	}
+
+}
+
 void Car::Draw()
 {
 	utils::SetColor(m_Color);
 
-	utils::FillPolygon(m_CarPoints);
+	utils::FillPolygon(m_CarPointsLocalSpace);
 
 	utils::SetColor(Color4f(1.f, 1.f, 0.f, 1.f));
-	utils::DrawLine(Point2f(m_CarPoints[1].x,
-							m_CarPoints[1].y),
-					Point2f(m_CarPoints[1].x + m_ForwardTwoBlade[0] * 10.f,
-							m_CarPoints[1].y + m_ForwardTwoBlade[1] * 10.f), 3.f);
+	utils::DrawLine(Point2f(m_CarPointsLocalSpace[1].x,
+							m_CarPointsLocalSpace[1].y),
+					Point2f(m_CarPointsLocalSpace[1].x + m_ForwardTwoBlade[0] * 10.f,
+						    m_CarPointsLocalSpace[1].y + m_ForwardTwoBlade[1] * 10.f), 3.f);
 
-	utils::DrawLine(Point2f(m_CarPoints[2].x,
-							m_CarPoints[2].y),
-							Point2f(m_CarPoints[2].x + m_ForwardTwoBlade[0] * 10.f,
-							m_CarPoints[2].y + m_ForwardTwoBlade[1] * 10.f), 3.f);
+	utils::DrawLine(Point2f(m_CarPointsLocalSpace[2].x,
+							m_CarPointsLocalSpace[2].y),
+					Point2f(m_CarPointsLocalSpace[2].x + m_ForwardTwoBlade[0] * 10.f,
+							m_CarPointsLocalSpace[2].y + m_ForwardTwoBlade[1] * 10.f), 3.f);
 
 }
 
@@ -115,8 +125,6 @@ void Car::Orbit(ThreeBlade orbitPoint)
 			m_LineToOrbitAround = rotationLine;
 			m_StartedRotating = true;
 		}
-
-
 
 		Motor rotation = Motor::Rotation(angularVelocity, m_LineToOrbitAround);
 
@@ -198,10 +206,6 @@ void Car::Snap()
 }
 
 
-std::vector<Point2f>& Car::GetCarPositions()
-{
-	return m_CarPoints;
-}
 
 void Car::CheckIntersectionWithMapBorders(const TwoBlade& border, const ThreeBlade& startPos, const ThreeBlade& endPos)
 {
@@ -257,5 +261,10 @@ void Car::Bounce(const ThreeBlade& hitPos, const TwoBlade& borderVector)
 	m_SideForceTwoBlade = reflector.Grade2();
 
 	m_TimeBouncing = 0.5f;
+}
+
+ThreeBlade Car::GetCarWorldLocation() const
+{
+	return ThreeBlade(m_CarPoints[0].x, m_CarPoints[0].y, 0.f);
 }
 

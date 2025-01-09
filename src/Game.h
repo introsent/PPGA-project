@@ -4,10 +4,14 @@
 #include "SDL_opengl.h"
 #include <memory>
 
+#include "Camera.h"
+
 #include "FlyFish.h"
 #include "Car.h" 
 
-class Game\
+#include "Camera.h"
+
+class Game
 {
 public:
 	explicit Game( const Window& window );
@@ -54,11 +58,17 @@ public:
 private:
 	// DATA MEMBERS
 	std::unique_ptr<Car> m_CarUPtr;
+	std::unique_ptr<Camera> m_CameraUPtr;
 
 	std::vector<Point2f> m_MapPointsRight;
 	std::vector<Point2f> m_MapPointsLeft;
 
 	std::vector<Point2f> m_MapPoints;
+	std::vector<Point2f> m_MapPointsLocalSpace;
+
+
+	float m_MaxMapWidth;
+	float m_MaxMapHeight;
 
 	bool m_IsDrifting = false;
 	ThreeBlade m_OrbitPoint;
