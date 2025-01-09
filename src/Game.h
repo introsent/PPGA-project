@@ -8,8 +8,7 @@
 
 #include "FlyFish.h"
 #include "Car.h" 
-
-#include "Camera.h"
+#include "RivalCar.h"
 
 class Game
 {
@@ -58,6 +57,8 @@ public:
 private:
 	// DATA MEMBERS
 	std::unique_ptr<Car> m_CarUPtr;
+	std::unique_ptr<RivalCar> m_RivalCarUPtr;
+
 	std::unique_ptr<Camera> m_CameraUPtr;
 
 	std::vector<Point2f> m_MapPointsRight;

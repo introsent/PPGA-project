@@ -1,10 +1,9 @@
 #pragma once
 #include "FlyFish.h"
 #include "utils.h"
+
 class RivalCar
 {
-
-
 public:
 	RivalCar(ThreeBlade startPos, TwoBlade forwardTwoBlade, float speed);
 

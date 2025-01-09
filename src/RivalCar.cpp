@@ -30,7 +30,7 @@ void RivalCar::Draw() const
 {
 	utils::SetColor(Color4f(1.f, 0.f, 0.f, 1.f));
 
-	Point2f startLinePos = Point2f(m_CarPoints[0].x + m_CarPoints[2].x / 2.f, m_CarPoints[0].y + m_CarPoints[2].y);
+	Point2f startLinePos = Point2f((m_CarPoints[0].x + m_CarPoints[2].x) / 2.f, (m_CarPoints[0].y + m_CarPoints[2].y) / 2.f);
 	for (const auto& direction : m_PossibleDirections)
 	{
 		Point2f endLinePos = Point2f(startLinePos.x + direction[0], startLinePos.y + direction[1]);
@@ -49,13 +49,15 @@ void RivalCar::CheckIntersectionWithMapBorders(const TwoBlade& border, const Thr
 
 void RivalCar::CalculatePossibleDirections()
 {
-	float directionTwoBladeSize = 30.f;
+	float directionTwoBladeSize = 60.f;
 
-	int amountOfPossibleDirection = 8;
+	int amountOfPossibleDirection = 20;
 	float segmentLength = 360.f / amountOfPossibleDirection; //45
 
-	for (int angle{ 0 }; angle < 360.f; ++segmentLength)
+	for (float angle{ 0.f }; angle <= 180.f; )
 	{
-		m_PossibleDirections.push_back(TwoBlade(directionTwoBladeSize * cos(angle), directionTwoBladeSize * sin(angle), 0.f, 0.f, 0.f, 0.f));
+		m_PossibleDirections.push_back(TwoBlade(directionTwoBladeSize * cosf(angle * utils::g_Pi / 180.f), directionTwoBladeSize * sinf(angle * utils::g_Pi /180.f), 0.f, 0.f, 0.f, 0.f));
+
+		angle += segmentLength; 
 	}
 }

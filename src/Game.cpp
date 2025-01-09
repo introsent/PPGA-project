@@ -105,6 +105,9 @@ void Game::InitializeGameEngine()
 
 	m_CarUPtr = std::make_unique<Car>(ThreeBlade(360.f, 200.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 0.f);
 
+	//m_RivalCarUPtr = std::make_unique<RivalCar>(ThreeBlade(360.f, 100.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 0.f);
+	m_RivalCarUPtr = std::make_unique<RivalCar>(ThreeBlade(360.f, 100.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 0.f);
+
 	//Left of the road
 	m_MapPoints.emplace_back(132.f, 50.f);
 	m_MapPoints.emplace_back(132.f, 189.f);
@@ -177,6 +180,8 @@ void Game::InitializeGameEngine()
 		return a.y < b.y;
 		});
 	m_MaxMapHeight =  maxYPoint->y;
+
+
 
 }
 
@@ -340,4 +345,6 @@ void Game::Draw() const
 	utils::SetColor(Color4f(0.7f, 0.7f, 0.7f, 1.f));
 
 	utils::DrawPolygon(m_MapPointsLocalSpace);
+
+	m_RivalCarUPtr->Draw();
 }
