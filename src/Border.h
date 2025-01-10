@@ -1,3 +1,4 @@
+#pragma once
 #include "FlyFish.h"
 struct Border
 {

@@ -2,6 +2,7 @@
 #include "FlyFish.h"
 #include "utils.h"
 #include "Camera.h"
+#include "Border.h"
 class RivalCar
 {
 public:
@@ -27,14 +28,15 @@ public:
 	//
 	//void Snap();
 	//
-	void CheckIntersectionWithMapBorders(const TwoBlade& border, const ThreeBlade& startPos, const ThreeBlade& endPos);
+	void CheckIntersectionWithMapBorders(const std::vector<Border>& bordersArray);
 	//
 	//void Bounce(const ThreeBlade& hitPos, const TwoBlade& borderVector);
 	//
 	//ThreeBlade GetCarWorldLocation() const;
 
-	void CalculatePossibleDirections();
+	void CalculatePossibleDirections(float startAngle);
 	void UpdateCarPointsLocalSpace(const Camera* cameraPtr);
+
 
 private:
 	ThreeBlade m_Position;
@@ -51,6 +53,13 @@ private:
 
 	std::vector<TwoBlade> m_PossibleDirections;
 	Color4f m_Color;
+
+
+	float m_DirectionTwoBladeSize = 90.f;
+
+	int m_AmountOfPossibleDirection = 20;
+
+	float m_SegmentLength = 360.f / m_AmountOfPossibleDirection;
 	//
 	//float m_TimeBouncing = 0.f;
 	//
