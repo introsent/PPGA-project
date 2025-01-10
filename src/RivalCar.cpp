@@ -1,6 +1,7 @@
 #include "RivalCar.h"
 #include "utils.h"
 #include <iostream>
+#include <algorithm> 
 
 RivalCar::RivalCar(ThreeBlade startPos, TwoBlade forwardTwoBlade, float speed) : m_Position(startPos), m_ForwardTwoBlade(forwardTwoBlade), m_Speed(speed)
 {
@@ -45,7 +46,6 @@ void RivalCar::Draw() const
 
 void RivalCar::RotateLookAt()
 {
-	m_CarPoints[0] = Point2f(m_CarPoints[0].x, m_CarPoints[0].y);
 
 	TwoBlade normalizedForwardTwoBlade = m_ForwardTwoBlade / m_ForwardTwoBlade.VNorm();
 	m_ForwardTwoBlade = normalizedForwardTwoBlade;
@@ -53,7 +53,7 @@ void RivalCar::RotateLookAt()
 	TwoBlade carDirection = TwoBlade::LineFromPoints(m_CarPoints[0].x, m_CarPoints[0].y, 0.f, m_CarPoints[1].x, m_CarPoints[1].y, 0.f).Normalized();
 	TwoBlade forwardDirection = TwoBlade(m_ForwardTwoBlade[3], m_ForwardTwoBlade[4], m_ForwardTwoBlade[5], m_ForwardTwoBlade[0], m_ForwardTwoBlade[1], m_ForwardTwoBlade[2]).Normalized();
 
-	float angleBetween = acosf(-carDirection | forwardDirection);
+	float angleBetween = acosf(std::clamp(-carDirection | forwardDirection, -1.0f, 1.0f));
 
 
 	ThreeBlade carMiddlePoint = ThreeBlade((m_CarPoints[0].x + m_CarPoints[2].x) / 2.f, (m_CarPoints[0].y + m_CarPoints[2].y) / 2.f, 0.f);
@@ -72,7 +72,6 @@ void RivalCar::RotateLookAt()
 		ThreeBlade position = (rotor * ThreeBlade(pos.x, pos.y, 0.f) * ~rotor).Grade3();
 		pos = Point2f(position[0], position[1]);
 	}
-
 
 	float startAngleRad = atan2f(-m_ForwardTwoBlade[0], m_ForwardTwoBlade[1]);
 	float startAngleDeg = startAngleRad * (180.f / utils::g_Pi);
@@ -142,76 +141,24 @@ void RivalCar::CheckIntersectionWithMapBorders(const std::vector<Border>& border
 	}
 
 	// Find the minimum value
-	auto minIt = std::min_element(indicesOfPossibleDirectionArray.begin(), indicesOfPossibleDirectionArray.end());
-	int minValue = (minIt != indicesOfPossibleDirectionArray.end()) ? *minIt : 0;
 
-	// Find the maximum value
-	auto maxIt = std::max_element(indicesOfPossibleDirectionArray.begin(), indicesOfPossibleDirectionArray.end());
-	int maxValue = (maxIt != indicesOfPossibleDirectionArray.end()) ? *maxIt : 0;
+	if (IsPossibleDirectionVectorContiguous(indicesOfPossibleDirectionArray))
+	{
+		auto minIt = std::min_element(indicesOfPossibleDirectionArray.begin(), indicesOfPossibleDirectionArray.end());
+		int minValue = (minIt != indicesOfPossibleDirectionArray.end()) ? *minIt : 0;
 
-	int desiredDirectionIndex = (minValue + maxValue) / 2; //integer division on purpose
+		// Find the maximum value
+		auto maxIt = std::max_element(indicesOfPossibleDirectionArray.begin(), indicesOfPossibleDirectionArray.end());
+		int maxValue = (maxIt != indicesOfPossibleDirectionArray.end()) ? *maxIt : 0;
 
-	m_ForwardTwoBlade = m_PossibleDirections[desiredDirectionIndex];
+		int desiredDirectionIndex = (minValue + maxValue) / 2; //integer division on purpose
 
-	RotateLookAt();
+		m_ForwardTwoBlade = m_PossibleDirections[desiredDirectionIndex];
 
+		RotateLookAt();
+	}
+	
 }
-
-//void RivalCar::CheckIntersectionWithMapBorders(const TwoBlade& border, const ThreeBlade& startPos, const ThreeBlade& endPos)
-//{
-//	std::vector<int> indicesOfPossibleDirectionArray;
-//
-//	ThreeBlade point1 = ThreeBlade((m_CarPoints[0].x + m_CarPoints[2].x) / 2.f, (m_CarPoints[0].y + m_CarPoints[2].y) / 2.f, 0.f);
-//	int currentInteration = 0;
-//	for (const auto& direction : m_PossibleDirections)
-//	{
-//		//ThreeBlade point1 = ThreeBlade(m_CarPoints[i % m_CarPoints.size()].x, m_CarPoints[i % m_CarPoints.size()].y, 0.f);
-//		ThreeBlade point2 = ThreeBlade(point1[0] + direction[0], point1[1] + direction[1], 0.f);
-//
-//		TwoBlade curTwoBlade = TwoBlade::LineFromPoints(point1[0], point1[1], point1[2], point2[0], point2[1], point2[2]);
-//
-//		TwoBlade curTwoBladeNoVanishing = ThreeBlade(curTwoBlade[3], curTwoBlade[4], curTwoBlade[5]) & ThreeBlade(0.f, 0.f, 0.f);
-//		TwoBlade borderTwoBladeNoVanishing = ThreeBlade(border[3], border[4], border[5]) & ThreeBlade(0.f, 0.f, 0.f);
-//
-//		ThreeBlade skewTest = (curTwoBladeNoVanishing ^ borderTwoBladeNoVanishing).Grade3();
-//
-//		ThreeBlade point;
-//
-//		if (skewTest == ThreeBlade(0.f, 0.f, 0.f, 0.f))
-//		{
-//			TwoBlade commonNormal = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, 1.f);
-//			ThreeBlade NPoint = commonNormal ^ OneBlade::OneBlade(1.f, 0.f, 0.f, 0.f);
-//			OneBlade commonPlane = NPoint & curTwoBlade;
-//
-//			point = (commonPlane ^ border).Normalize();
-//		}
-//
-//		TwoBlade carToIntersectionPoint = TwoBlade::LineFromPoints(point1[0], point1[1], point1[2], point[0], point[1], point[2]);
-//		float distance = carToIntersectionPoint.VNorm();
-//
-//		if (distance > curTwoBlade.VNorm())
-//		{
-//			indicesOfPossibleDirectionArray.push_back(currentInteration);
-//		}
-//		currentInteration += 1;
-//	}
-//
-//	// Find the minimum value
-//	auto minIt = std::min_element(indicesOfPossibleDirectionArray.begin(), indicesOfPossibleDirectionArray.end());
-//	int minValue = (minIt != indicesOfPossibleDirectionArray.end()) ? *minIt : 0;
-//
-//	// Find the maximum value
-//	auto maxIt = std::max_element(indicesOfPossibleDirectionArray.begin(), indicesOfPossibleDirectionArray.end());
-//	int maxValue = (maxIt != indicesOfPossibleDirectionArray.end()) ? *maxIt : 0;
-//
-//	int desiredDirectionIndex = (minValue + maxValue) / 2; //integer division on purpose
-//
-//	m_ForwardTwoBlade = m_PossibleDirections[desiredDirectionIndex];
-//
-//	RotateLookAt();
-//	
-//	//std::cout << "gheello.Ha llo goeden dag meneer ik kom met de request vcan vandaag om eer voor te zorgen dat we de std library vermoorden dat wat vind ik erg fijn want die shit is fakking bull shit " << std::begin;
-//}
 
 void RivalCar::CalculatePossibleDirections(float startAngle)
 {
@@ -230,4 +177,13 @@ void RivalCar::UpdateCarPointsLocalSpace(const Camera* cameraPtr)
 	{
 		m_CarPointsLocalSpace.push_back(cameraPtr->GetAppliedTransform(carPoint));
 	}
+}
+
+bool RivalCar::IsPossibleDirectionVectorContiguous(const std::vector<int>& vec) {
+	if (vec.size() < 2) return true;
+	auto it = std::adjacent_find(vec.begin(), vec.end(), [](int a, int b) {
+		return b != a + 1;
+		});
+
+	return it == vec.end(); 
 }

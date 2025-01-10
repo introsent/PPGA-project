@@ -106,7 +106,7 @@ void Game::InitializeGameEngine()
 	m_CarUPtr = std::make_unique<Car>(ThreeBlade(360.f, 200.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 0.f);
 
 	//m_RivalCarUPtr = std::make_unique<RivalCar>(ThreeBlade(360.f, 100.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 0.f);
-	m_RivalCarUPtr = std::make_unique<RivalCar>(ThreeBlade(320.f, 250.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 100.f);
+	m_RivalCarUPtr = std::make_unique<RivalCar>(ThreeBlade(340.f, 250.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 100.f);
 
 	//Left of the road
 	m_MapPoints.emplace_back(132.f, 50.f);

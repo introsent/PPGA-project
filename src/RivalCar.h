@@ -37,6 +37,8 @@ public:
 	void CalculatePossibleDirections(float startAngle);
 	void UpdateCarPointsLocalSpace(const Camera* cameraPtr);
 
+	bool IsPossibleDirectionVectorContiguous(const std::vector<int>& vec);
+
 
 private:
 	ThreeBlade m_Position;
