@@ -1,16 +1,16 @@
 #pragma once
 #include "FlyFish.h"
 #include "utils.h"
-
+#include "Camera.h"
 class RivalCar
 {
 public:
 	RivalCar(ThreeBlade startPos, TwoBlade forwardTwoBlade, float speed);
 
-	void Update(float elapsedSec);
+	//void Update(float elapsedSec);
 
 	//void UpdateSideForce(float elapsedSec);
-	//void UpdateForwardForce(float elapsedSec);
+	void UpdateForwardForce(float elapsedSec);
 	//void UpdateCarPointsLocalSpace(const Camera* cameraPtr);
 
 	void Draw() const;
@@ -34,7 +34,7 @@ public:
 	//ThreeBlade GetCarWorldLocation() const;
 
 	void CalculatePossibleDirections();
-
+	void UpdateCarPointsLocalSpace(const Camera* cameraPtr);
 
 private:
 	ThreeBlade m_Position;
