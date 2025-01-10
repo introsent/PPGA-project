@@ -50,6 +50,8 @@ void RivalCar::RotateLookAt()
 	m_CarPoints[1] = Point2f(m_CarPoints[0].x + m_Width * normalizedForwardTwoBlade[0], m_CarPoints[0].y + m_Height * normalizedForwardTwoBlade[1]);
 	m_CarPoints[2] = Point2f(m_CarPoints[1].x + m_Width * normalizedForwardTwoBlade[1], m_CarPoints[1].y + m_Height * (-normalizedForwardTwoBlade[0]));
 	m_CarPoints[3] = Point2f(m_CarPoints[0].x + m_Width * normalizedForwardTwoBlade[1], m_CarPoints[0].y + m_Height * (-normalizedForwardTwoBlade[0]));
+
+	m_ForwardTwoBlade = normalizedForwardTwoBlade;
 }
 
 void RivalCar::CheckIntersectionWithMapBorders(const TwoBlade& border, const ThreeBlade& startPos, const ThreeBlade& endPos)
@@ -81,14 +83,10 @@ void RivalCar::CheckIntersectionWithMapBorders(const TwoBlade& border, const Thr
 			point = (commonPlane ^ border).Normalize();
 		}
 
-		if (
-			(std::min(point1[0], point2[0]) > point[0] && point[0] > std::max(point1[0], point2[0]) &&
-				std::min(point1[1], point2[1]) > point[1] && point[1] && std::max(point1[1], point2[1]))
-			&&
-			(std::min(startPos[0], endPos[0]) > point[0] && point[0] > std::max(startPos[0], endPos[0]) &&
-				std::min(startPos[1], endPos[1]) > point[1] && point[1] > std::max(startPos[1], endPos[1]))
-		
-			)
+		TwoBlade carToIntersectionPoint = TwoBlade::LineFromPoints(point1[0], point1[1], point1[2], point[0], point[1], point[2]);
+		float distance = carToIntersectionPoint.VNorm();
+
+		if (distance > curTwoBlade.VNorm())
 		{
 			indicesOfPossibleDirectionArray.push_back(currentInteration);
 		}
@@ -105,10 +103,11 @@ void RivalCar::CheckIntersectionWithMapBorders(const TwoBlade& border, const Thr
 
 	int desiredDirectionIndex = (minValue + maxValue) / 2; //integer division on purpose
 
-	m_ForwardTwoBlade = m_PossibleDirections[desiredDirectionIndex] / m_PossibleDirections[desiredDirectionIndex].VNorm();
+	m_ForwardTwoBlade = m_PossibleDirections[desiredDirectionIndex];
 
 	RotateLookAt();
 	
+	//std::cout << "gheello.Ha llo goeden dag meneer ik kom met de request vcan vandaag om eer voor te zorgen dat we de std library vermoorden dat wat vind ik erg fijn want die shit is fakking bull shit " << std::begin;
 }
 
 void RivalCar::CalculatePossibleDirections()
@@ -120,7 +119,7 @@ void RivalCar::CalculatePossibleDirections()
 
 	for (float angle{ 0.f }; angle <= 180.f; )
 	{
-		m_PossibleDirections.push_back(TwoBlade(directionTwoBladeSize * cosf(angle * utils::g_Pi / 180.f), directionTwoBladeSize * sinf(angle * utils::g_Pi /180.f), 0.f, 0.f, 0.f, 0.f));
+		m_PossibleDirections.push_back(TwoBlade(float(int(directionTwoBladeSize * cosf(angle * utils::g_Pi / 180.f))), float(int(directionTwoBladeSize * sinf(angle * utils::g_Pi /180.f))), 0.f, 0.f, 0.f, 0.f));
 
 		angle += segmentLength; 
 	}

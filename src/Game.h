@@ -5,10 +5,10 @@
 #include <memory>
 
 #include "Camera.h"
-
 #include "FlyFish.h"
 #include "Car.h" 
 #include "RivalCar.h"
+#include "Border.h"
 
 class Game
 {
@@ -53,7 +53,6 @@ public:
 	{
 		return m_Viewport;
 	}
-
 private:
 	// DATA MEMBERS
 	std::unique_ptr<Car> m_CarUPtr;
@@ -67,6 +66,7 @@ private:
 	std::vector<Point2f> m_MapPoints;
 	std::vector<Point2f> m_MapPointsLocalSpace;
 
+	std::vector<Border> m_MapBorders;
 
 	float m_MaxMapWidth;
 	float m_MaxMapHeight;

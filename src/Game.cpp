@@ -168,6 +168,19 @@ void Game::InitializeGameEngine()
 		point.y *= 2.f;
 	}
 
+	for (int i = 0; i < m_MapPoints.size(); ++i)
+	{
+		ThreeBlade point1 = ThreeBlade(m_MapPoints[i % m_MapPoints.size()].x, m_MapPoints[i % m_MapPoints.size()].y, 0.f);
+		ThreeBlade point2 = ThreeBlade(m_MapPoints[(i + 1) % m_MapPoints.size()].x, m_MapPoints[(i + 1) % m_MapPoints.size()].y, 0.f);
+
+		TwoBlade borderTwoBlade = TwoBlade::LineFromPoints(point1[0], point1[1], point1[2], point2[0], point2[1], point2[2]);
+
+		m_MapBorders.push_back(Border(borderTwoBlade, point1, point2));
+
+		//m_CarUPtr->CheckIntersectionWithMapBorders(borderTwoBlade, point1, point2);
+		//
+		//m_RivalCarUPtr->CheckIntersectionWithMapBorders(borderTwoBlade, point1, point2);
+	}
 
 	m_CameraUPtr = std::make_unique<Camera>(GetViewPort().width, GetViewPort().height);
 
@@ -311,6 +324,11 @@ void Game::Update(float elapsedSec)
 		m_CarUPtr->CheckIntersectionWithMapBorders(borderTwoBlade, point1, point2);
 
 		m_RivalCarUPtr->CheckIntersectionWithMapBorders(borderTwoBlade, point1, point2);
+	}
+
+	for (const auto& border : m_MapBorders)
+	{
+		m_CarUPtr->CheckIntersectionWithMapBorders(border.borderDirection, border.startPosition, border.endPosition);
 	}
 
 	if (m_IsDrifting)
