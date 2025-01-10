@@ -36,7 +36,7 @@ void RivalCar::Draw() const
 
 	utils::SetColor(Color4f(1.f, 0.f, 0.f, 1.f));
 
-	Point2f startLinePos = Point2f((m_CarPoints[0].x + m_CarPoints[2].x) / 2.f, (m_CarPoints[0].y + m_CarPoints[2].y) / 2.f);
+	Point2f startLinePos = Point2f((m_CarPointsLocalSpace[0].x + m_CarPointsLocalSpace[2].x) / 2.f, (m_CarPointsLocalSpace[0].y + m_CarPointsLocalSpace[2].y) / 2.f);
 	for (const auto& direction : m_PossibleDirections)
 	{
 		Point2f endLinePos = Point2f(startLinePos.x + direction[0], startLinePos.y + direction[1]);
@@ -53,20 +53,38 @@ void RivalCar::RotateLookAt()
 	TwoBlade carDirection = TwoBlade::LineFromPoints(m_CarPoints[0].x, m_CarPoints[0].y, 0.f, m_CarPoints[1].x, m_CarPoints[1].y, 0.f).Normalized();
 	TwoBlade forwardDirection = TwoBlade(m_ForwardTwoBlade[3], m_ForwardTwoBlade[4], m_ForwardTwoBlade[5], m_ForwardTwoBlade[0], m_ForwardTwoBlade[1], m_ForwardTwoBlade[2]).Normalized();
 
-	float angleBetween = acosf(std::clamp(-carDirection | forwardDirection, -1.0f, 1.0f));
+	float angleBetween = acosf(std::clamp(-forwardDirection | carDirection, -1.0f, 1.0f));
 
+	if (angleBetween > utils::g_Pi / 4.f)
+	{
+		angleBetween = utils::g_Pi / 2.f - angleBetween;
+	}
 
 	ThreeBlade carMiddlePoint = ThreeBlade((m_CarPoints[0].x + m_CarPoints[2].x) / 2.f, (m_CarPoints[0].y + m_CarPoints[2].y) / 2.f, 0.f);
 	TwoBlade originToOrbitPoint = TwoBlade(carMiddlePoint[0], carMiddlePoint[1], carMiddlePoint[2], 0.f, 0.f, 0.f);
 	float distance = originToOrbitPoint.VNorm();
-	TwoBlade rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, 1.f);
-	
-	Motor rotation = Motor::Rotation(angleBetween * 180.f / utils::g_Pi, rotationLine);
-	
+
+
+	auto perpDot = forwardDirection[3] * carDirection[4] - forwardDirection[4] * carDirection[3];
+
+	TwoBlade rotationLine;
+	if (perpDot > 0)
+	{
+		rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, 1.f);
+	}
+	else if (perpDot <= 0)
+	{
+		rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, -1.f);
+	}
+
+	//TwoBlade rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, 1.f);
+
+	Motor rotation = Motor::Rotation(-angleBetween * 180.f / utils::g_Pi, rotationLine);
+
 	Motor translator = Motor::Translation(distance, originToOrbitPoint);
-	
+
 	Motor rotor = (translator * rotation * ~translator);
-	
+
 	for (Point2f& pos : m_CarPoints)
 	{
 		ThreeBlade position = (rotor * ThreeBlade(pos.x, pos.y, 0.f) * ~rotor).Grade3();
