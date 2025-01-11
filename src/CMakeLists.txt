@@ -6,9 +6,24 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project("GEOAProject")
 
 # Add source files
-add_executable(GEOAProject "FlyFish.cpp" "Game.cpp" "structs.cpp" "utils.cpp" "main.cpp" "Car.cpp" "Car.h" "Camera.cpp" "Camera.h" "RivalCar.cpp" "RivalCar.h" "Border.h")
+add_executable(GEOAProject
+    "FlyFish.cpp"
+    "Game.cpp"
+    "structs.cpp"
+    "utils.cpp"
+    "main.cpp"
+    "Car.cpp"
+    "Car.h"
+    "Camera.cpp"
+    "Camera.h"
+    "RivalCar.cpp"
+    "RivalCar.h"
+    "Border.h"
+    "GizmosDrawer.cpp"
+    "GizmosDrawer.h"
+)
 
-if (CMAKE_VERSION VERSION_GREATER 3.12)
+if(CMAKE_VERSION VERSION_GREATER 3.12)
     set_property(TARGET GEOAProject PROPERTY CXX_STANDARD 20)
 endif()
 

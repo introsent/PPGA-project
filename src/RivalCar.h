@@ -19,6 +19,8 @@ public:
 
 	bool IsPossibleDirectionVectorContiguous(const std::vector<int>& vec);
 
+	//bool CheckFinished(float elapsedSec )
+
 
 private:
 	ThreeBlade m_Position;

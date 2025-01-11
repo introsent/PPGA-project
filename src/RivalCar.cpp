@@ -2,6 +2,7 @@
 #include "utils.h"
 #include <iostream>
 #include <algorithm> 
+#include "GizmosDrawer.h"
 
 RivalCar::RivalCar(ThreeBlade startPos, TwoBlade forwardTwoBlade, float speed, Color4f color) : m_Position(startPos), m_ForwardTwoBlade(forwardTwoBlade), m_Speed(speed), m_Color(color)
 {
@@ -65,11 +66,11 @@ void RivalCar::RotateLookAt()
 
 	float angleBetween = acosf(std::clamp(-forwardDirection | carDirection, -1.0f, 1.0f));
 
-	if (angleBetween > utils::g_Pi / 4.f)
-	{
-		angleBetween = utils::g_Pi / 2.f - angleBetween;
-	}
-
+	//f (angleBetween > utils::g_Pi / 4.f)
+	//
+	//	angleBetween = utils::g_Pi / 2.f - angleBetween;
+	//
+ 
 	ThreeBlade carMiddlePoint = ThreeBlade((m_CarPoints[0].x + m_CarPoints[2].x) / 2.f, (m_CarPoints[0].y + m_CarPoints[2].y) / 2.f, 0.f);
 	TwoBlade originToOrbitPoint = TwoBlade(carMiddlePoint[0], carMiddlePoint[1], carMiddlePoint[2], 0.f, 0.f, 0.f);
 	float distance = originToOrbitPoint.VNorm();
@@ -118,6 +119,11 @@ void RivalCar::CheckIntersectionWithMapBorders(const std::vector<Border>& border
 
 
 		bool isPossible = true;
+
+		if (currentInteration == 10) {
+			std::cout << "PANIC\n";
+		}
+
 		for (const auto& border : bordersArray)
 		{
 			TwoBlade borderTwoBladeNoVanishing = ThreeBlade(border.borderDirection[3], border.borderDirection[4], border.borderDirection[5]) & ThreeBlade(0.f, 0.f, 0.f);
@@ -127,36 +133,54 @@ void RivalCar::CheckIntersectionWithMapBorders(const std::vector<Border>& border
 
 			if (skewTest == ThreeBlade(0.f, 0.f, 0.f, 0.f))
 			{
-				TwoBlade commonNormal = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, 1.f);
+				TwoBlade commonNormal = (curTwoBlade.Normalized() * border.borderDirection).Grade2();
 				ThreeBlade NPoint = (commonNormal ^ OneBlade::OneBlade(1.f, 0.f, 0.f, 0.f));
 				OneBlade commonPlane = NPoint & curTwoBlade.Normalized();
 
-				point = (commonPlane ^ border.borderDirection).Normalized();
+				point = (commonPlane ^ border.borderDirection).Normalize();
 
+				// Precompute bounds for point1-point2
+				float minX1 = std::min(point1[0], point2[0]);
+				float maxX1 = std::max(point1[0], point2[0]);
+				float minY1 = std::min(point1[1], point2[1]);
+				float maxY1 = std::max(point1[1], point2[1]);
+
+
+				// Precompute bounds for border.startPosition-border.endPosition
+				float minX2 = std::min(border.startPosition[0], border.endPosition[0]);
+				float maxX2 = std::max(border.startPosition[0], border.endPosition[0]);
+				float minY2 = std::min(border.startPosition[1], border.endPosition[1]);
+				float maxY2 = std::max(border.startPosition[1], border.endPosition[1]);
+
+				if (currentInteration == 10) {
+					GizmosDrawer::SetColor(Color4f{ 1,0,0,1 });
+					GizmosDrawer::DrawLine(Point2f{ minX1, minY1 }, Point2f{ maxX1, maxY1 });
+					GizmosDrawer::DrawLine(Point2f{ minX2, minY2 }, Point2f{ maxX2, maxY2 });
+				}
+
+
+				// Check bounds
 				if (
-					(std::min(point1[0], point2[0]) <= point[0] && point[0] <= std::max(point1[0], point2[0]) &&
-						std::min(point1[1], point2[1]) <= point[1] && point[1] <= std::max(point1[1], point2[1]))
-					&&
-					(std::min(border.startPosition[0], border.endPosition[0]) <= point[0] && point[0] <= std::max(border.startPosition[0], border.endPosition[0]) &&
-						std::min(border.startPosition[1], border.endPosition[1]) <= point[1] && point[1] <= std::max(border.startPosition[1], border.endPosition[1]))
-
-					)
+					(minX1 <= point[0] && point[0] <= maxX1 && minY1 <= point[1] && point[1] <= maxY1) &&
+					(minX2 <= point[0] && point[0] <= maxX2 && minY2 <= point[1] && point[1] <= maxY2)
+					) 
 				{
 					TwoBlade carToIntersectionPoint = TwoBlade::LineFromPoints(point1[0], point1[1], point1[2], point[0], point[1], point[2]);
 					float distance = carToIntersectionPoint.Norm();
 
-					if (distance <= curTwoBlade.Norm())
-					{
+					//if (distance <= curTwoBlade.Norm())
+					//{
 						isPossible = false;
 						break;
 
-					}
+					//}
 				}
 			}
 		}
 
 		if (isPossible)
 		{
+
 			indicesOfPossibleDirectionArray.push_back(currentInteration);
 		}
 		currentInteration += 1;
@@ -170,14 +194,19 @@ void RivalCar::CheckIntersectionWithMapBorders(const std::vector<Border>& border
 
 		// Find the maximum value
 		auto maxIt = std::max_element(indicesOfPossibleDirectionArray.begin(), indicesOfPossibleDirectionArray.end());
-		int maxValue = (maxIt != indicesOfPossibleDirectionArray.end()) ? *maxIt : 0;
+		int maxValue = (maxIt != indicesOfPossibleDirectionArray.end()) ? *maxIt : indicesOfPossibleDirectionArray.size();
 
 		int desiredDirectionIndex = (minValue + maxValue) / 2; //integer division on purpose
 
 		m_ForwardTwoBlade = m_PossibleDirections[desiredDirectionIndex];
 
-		RotateLookAt();
 	}
+	else
+	{
+		m_ForwardTwoBlade = m_ForwardTwoBlade;
+	}
+
+	RotateLookAt();
 }
 
 void RivalCar::CalculatePossibleDirections(float startAngle)

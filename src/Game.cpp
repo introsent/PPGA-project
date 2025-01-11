@@ -8,6 +8,7 @@
 #include "utils.h"
 #include "structs.h"
 #include "FlyFish.h"
+#include "GizmosDrawer.h"
 
 Game::Game(const Window& window)
 	: m_Window{ window }
@@ -107,7 +108,7 @@ void Game::InitializeGameEngine()
 
 	//m_RivalCarUPtr = std::make_unique<RivalCar>(ThreeBlade(360.f, 100.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 0.f);
 	m_RivalCarUPtr = std::make_unique<RivalCar>(ThreeBlade(340.f, 250.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 150.f, Color4f(0.f, 0.f, 1.f, 1.f));
-	m_RivalCar2UPtr = std::make_unique<RivalCar>(ThreeBlade(340.f, 250.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 165.f, Color4f(1.f, 0.f, 0.f, 1.f));
+	m_RivalCar2UPtr = std::make_unique<RivalCar>(ThreeBlade(340.f, 150.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 165.f, Color4f(1.f, 0.f, 0.f, 1.f));
 
 	//Left of the road
 	m_MapPoints.emplace_back(132.f, 50.f);
@@ -207,6 +208,10 @@ void Game::Run()
 	// Set start time
 	std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
 
+	float currentTime{};
+	GizmosDrawer::SetTimePointer(&currentTime);
+
+
 	//The event loop
 	SDL_Event e{};
 	while (!quit)
@@ -276,6 +281,9 @@ void Game::Run()
 			// Update current time
 			t1 = t2;
 
+			currentTime += elapsedSeconds;
+
+
 			// Prevent jumps in time caused by break points
 			elapsedSeconds = std::min(elapsedSeconds, m_MaxElapsedSeconds);
 
@@ -334,6 +342,10 @@ void Game::Update(float elapsedSec)
 
 		m_RivalCarUPtr->CheckIntersectionWithMapBorders(m_MapBorders);
 		m_RivalCarUPtr->UpdateForwardForce(elapsedSec);
+		
+		//m_RivalCar2UPtr->CheckIntersectionWithMapBorders(m_MapBorders);
+		//m_RivalCar2UPtr->UpdateForwardForce(elapsedSec);
+		
 	}
 
 	m_CameraUPtr->Aim(m_MaxMapWidth, m_MaxMapHeight, m_CarUPtr->GetCarWorldLocation());
@@ -341,6 +353,7 @@ void Game::Update(float elapsedSec)
 	m_CarUPtr->UpdateCarPointsLocalSpace(m_CameraUPtr.get());
 
 	m_RivalCarUPtr->UpdateCarPointsLocalSpace(m_CameraUPtr.get());
+	m_RivalCar2UPtr->UpdateCarPointsLocalSpace(m_CameraUPtr.get());
 
 	m_MapPointsLocalSpace.clear();
 	for (const Point2f& mapPoint : m_MapPoints)
@@ -363,4 +376,7 @@ void Game::Draw() const
 	utils::DrawPolygon(m_MapPointsLocalSpace);
 
 	m_RivalCarUPtr->Draw();
+	m_RivalCar2UPtr->Draw();
+
+	GizmosDrawer::Draw();
 }
