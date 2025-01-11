@@ -3,6 +3,9 @@
 #include <numbers>
 #include <iostream>
 #include <algorithm>
+#include <cmath>
+
+const float EPSILON = float(1e-3);
 Car::Car(ThreeBlade startPos, TwoBlade forwardTwoBlade, float speed) : m_Position(startPos), m_ForwardTwoBlade(forwardTwoBlade), m_Speed(speed)
 {
 	m_Width  = 15.f;
@@ -237,14 +240,12 @@ void Car::CheckIntersectionWithMapBorders(const TwoBlade& border, const ThreeBla
 
 			point = (commonPlane ^ border).Normalize();
 		}
-
-		if (
-			(std::min(point1[0], point2[0]) <= point[0] && point[0] <= std::max(point1[0], point2[0]) &&
-			std::min(point1[1], point2[1]) <= point[1] && point[1] <= std::max(point1[1], point2[1]))
-			&&
-			(std::min(startPos[0], endPos[0]) <= point[0] && point[0] <= std::max(startPos[0], endPos[0]) &&
-			std::min(startPos[1], endPos[1]) <= point[1] && point[1] <= std::max(startPos[1], endPos[1]))
-
+		
+		if (IsPointInRange(point[0], point[1],
+				point1[0], point1[1],
+				point2[0], point2[1],
+				startPos[0], startPos[1],
+				endPos[0], endPos[1])
 			)
 		{
 			Bounce(point, border);
@@ -301,5 +302,25 @@ void Car::Bounce(const ThreeBlade& hitPos, const TwoBlade& borderVector)
 ThreeBlade Car::GetCarWorldLocation() const
 {
 	return ThreeBlade(m_CarPoints[0].x, m_CarPoints[0].y, 0.f);
+}
+
+bool Car::IsPointInRange(float px, float py, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4)
+{
+	// Check if the point is within the range of the first TwoBlade
+	bool inRangeVec1 =
+		((x1 - EPSILON <= px && px <= x2 + EPSILON) ||
+			(x2 - EPSILON <= px && px <= x1 + EPSILON)) &&
+		((y1 - EPSILON <= py && py <= y2 + EPSILON) ||
+			(y2 - EPSILON <= py && py <= y1 + EPSILON));
+
+	// Check if the point is within the range of the second vector
+	bool inRangeVec2 =
+		((x3 - EPSILON <= px && px <= x4 + EPSILON) ||
+			(x4 - EPSILON <= px && px <= x3 + EPSILON)) &&
+		((y3 - EPSILON <= py && py <= y4 + EPSILON) ||
+			(y4 - EPSILON <= py && py <= y3 + EPSILON));
+
+	// The point must satisfy both ranges
+	return inRangeVec1 && inRangeVec2;
 }
 

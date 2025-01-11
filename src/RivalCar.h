@@ -20,7 +20,9 @@ public:
 	bool IsPossibleDirectionVectorContiguous(const std::vector<int>& vec);
 
 	//bool CheckFinished(float elapsedSec )
-
+	bool IsPointInRange(float px, float py,
+		float x1, float y1, float x2, float y2,
+		float x3, float y3, float x4, float y4);
 
 private:
 	ThreeBlade m_Position;
@@ -37,9 +39,9 @@ private:
 	Color4f m_Color;
 
 
-	float m_DirectionTwoBladeSize = 92.f;
+	float m_DirectionTwoBladeSize = 90.f;
 
-	int m_AmountOfPossibleDirection = 20;
+	int m_AmountOfPossibleDirection = 50;
 
 	float m_SegmentLength = 360.f / m_AmountOfPossibleDirection;
 

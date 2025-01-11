@@ -3,7 +3,9 @@
 #include <iostream>
 #include <algorithm> 
 #include "GizmosDrawer.h"
+#include <cmath>
 
+const float EPSILON = float(1e-3);
 RivalCar::RivalCar(ThreeBlade startPos, TwoBlade forwardTwoBlade, float speed, Color4f color) : m_Position(startPos), m_ForwardTwoBlade(forwardTwoBlade), m_Speed(speed), m_Color(color)
 {
 	m_Width = 15.f;
@@ -120,9 +122,7 @@ void RivalCar::CheckIntersectionWithMapBorders(const std::vector<Border>& border
 
 		bool isPossible = true;
 
-		if (currentInteration == 10) {
-			std::cout << "PANIC\n";
-		}
+		
 
 		for (const auto& border : bordersArray)
 		{
@@ -138,42 +138,17 @@ void RivalCar::CheckIntersectionWithMapBorders(const std::vector<Border>& border
 				OneBlade commonPlane = NPoint & curTwoBlade.Normalized();
 
 				point = (commonPlane ^ border.borderDirection).Normalize();
-
-				// Precompute bounds for point1-point2
-				float minX1 = std::min(point1[0], point2[0]);
-				float maxX1 = std::max(point1[0], point2[0]);
-				float minY1 = std::min(point1[1], point2[1]);
-				float maxY1 = std::max(point1[1], point2[1]);
-
-
-				// Precompute bounds for border.startPosition-border.endPosition
-				float minX2 = std::min(border.startPosition[0], border.endPosition[0]);
-				float maxX2 = std::max(border.startPosition[0], border.endPosition[0]);
-				float minY2 = std::min(border.startPosition[1], border.endPosition[1]);
-				float maxY2 = std::max(border.startPosition[1], border.endPosition[1]);
-
-				if (currentInteration == 10) {
-					GizmosDrawer::SetColor(Color4f{ 1,0,0,1 });
-					GizmosDrawer::DrawLine(Point2f{ minX1, minY1 }, Point2f{ maxX1, maxY1 });
-					GizmosDrawer::DrawLine(Point2f{ minX2, minY2 }, Point2f{ maxX2, maxY2 });
-				}
-
-
+				
 				// Check bounds
-				if (
-					(minX1 <= point[0] && point[0] <= maxX1 && minY1 <= point[1] && point[1] <= maxY1) &&
-					(minX2 <= point[0] && point[0] <= maxX2 && minY2 <= point[1] && point[1] <= maxY2)
-					) 
+				if (IsPointInRange(point[0], point[1], 
+					point1[0], point1[1], 
+					point2[0], point2[1], 
+					border.startPosition[0], border.startPosition[1], 
+					border.endPosition[0], border.endPosition[1]))
+		
 				{
-					TwoBlade carToIntersectionPoint = TwoBlade::LineFromPoints(point1[0], point1[1], point1[2], point[0], point[1], point[2]);
-					float distance = carToIntersectionPoint.Norm();
-
-					//if (distance <= curTwoBlade.Norm())
-					//{
-						isPossible = false;
-						break;
-
-					//}
+					isPossible = false;
+					break;
 				}
 			}
 		}
@@ -194,7 +169,7 @@ void RivalCar::CheckIntersectionWithMapBorders(const std::vector<Border>& border
 
 		// Find the maximum value
 		auto maxIt = std::max_element(indicesOfPossibleDirectionArray.begin(), indicesOfPossibleDirectionArray.end());
-		int maxValue = (maxIt != indicesOfPossibleDirectionArray.end()) ? *maxIt : indicesOfPossibleDirectionArray.size();
+		int maxValue = (maxIt != indicesOfPossibleDirectionArray.end()) ? *maxIt : int(indicesOfPossibleDirectionArray.size());
 
 		int desiredDirectionIndex = (minValue + maxValue) / 2; //integer division on purpose
 
@@ -235,4 +210,24 @@ bool RivalCar::IsPossibleDirectionVectorContiguous(const std::vector<int>& vec) 
 		});
 
 	return it == vec.end(); 
+}
+
+bool RivalCar::IsPointInRange(float px, float py, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4)
+{
+	// Check if the point is within the range of the first TwoBlade
+	bool inRangeVec1 =
+		((x1 - EPSILON <= px && px <= x2 + EPSILON) ||
+			(x2 - EPSILON <= px && px <= x1 + EPSILON)) &&
+		((y1 - EPSILON <= py && py <= y2 + EPSILON) ||
+			(y2 - EPSILON <= py && py <= y1 + EPSILON));
+
+	// Check if the point is within the range of the second vector
+	bool inRangeVec2 =
+		((x3 - EPSILON <= px && px <= x4 + EPSILON) ||
+			(x4 - EPSILON <= px && px <= x3 + EPSILON)) &&
+		((y3 - EPSILON <= py && py <= y4 + EPSILON) ||
+			(y4 - EPSILON <= py && py <= y3 + EPSILON));
+
+	// The point must satisfy both ranges
+	return inRangeVec1 && inRangeVec2;
 }

@@ -343,8 +343,8 @@ void Game::Update(float elapsedSec)
 		m_RivalCarUPtr->CheckIntersectionWithMapBorders(m_MapBorders);
 		m_RivalCarUPtr->UpdateForwardForce(elapsedSec);
 		
-		//m_RivalCar2UPtr->CheckIntersectionWithMapBorders(m_MapBorders);
-		//m_RivalCar2UPtr->UpdateForwardForce(elapsedSec);
+		m_RivalCar2UPtr->CheckIntersectionWithMapBorders(m_MapBorders);
+		m_RivalCar2UPtr->UpdateForwardForce(elapsedSec);
 		
 	}
 
