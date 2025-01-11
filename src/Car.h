@@ -33,6 +33,10 @@ public:
 
 	ThreeBlade GetCarWorldLocation() const;
 
+	float Remap(float value, float fromLow, float fromHigh, float toLow, float toHigh) {
+		return toLow + (value - fromLow) * (toHigh - toLow) / (fromHigh - fromLow);
+	}
+
 
 private:
 	ThreeBlade m_Position;

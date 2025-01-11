@@ -2,11 +2,12 @@
 #include "utils.h"
 #include <numbers>
 #include <iostream>
+#include <algorithm>
 Car::Car(ThreeBlade startPos, TwoBlade forwardTwoBlade, float speed) : m_Position(startPos), m_ForwardTwoBlade(forwardTwoBlade), m_Speed(speed)
 {
 	m_Width  = 15.f;
 	m_Height = 30.f;
-	m_Color = Color4f(1.f, 1.f, 1.f, 1.f);
+	m_Color = Color4f(0.f, Remap(m_Speed, 0.f, 300.f, 0.2f, 1.f), 0.f, 1.f);
 
 	m_CarPoints.push_back(Point2f(m_Position[0], m_Position[1]));
 	m_CarPoints.push_back(Point2f(m_Position[0], m_Position[1] + m_Height));
@@ -81,12 +82,17 @@ void Car::Draw()
 
 void Car::IncreaseSpeed()
 {
-	m_Speed += 50.f;
+	if (m_Speed + 50 < 300.f)
+	{
+		m_Speed += 50.f;
+	}
+	m_Color = Color4f(0.f, Remap(m_Speed, 0.f, 300.f, 0.2f, 1.f), 0.f, 1.f);
 }
 
 void Car::DecreaseSpeed()
 {
 	m_Speed -= 50.f;
+	m_Color = Color4f(0.f, Remap(m_Speed, 0.f, 300.f, 0.2f, 1.f), 0.f, 1.f);
 }
 
 float Car::DetermineAngularVelocity(TwoBlade& radiusTwoBlade)

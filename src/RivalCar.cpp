@@ -34,7 +34,7 @@ void RivalCar::Draw() const
 
 	utils::FillPolygon(m_CarPointsLocalSpace);
 
-	utils::SetColor(Color4f(1.f, 0.f, 0.f, 1.f));
+	utils::SetColor(Color4f(1.f, 0.f, 0.f, 0.35f));
 
 	Point2f startLinePos = Point2f((m_CarPointsLocalSpace[0].x + m_CarPointsLocalSpace[2].x) / 2.f, (m_CarPointsLocalSpace[0].y + m_CarPointsLocalSpace[2].y) / 2.f);
 	for (const auto& direction : m_PossibleDirections)
@@ -42,11 +42,21 @@ void RivalCar::Draw() const
 		Point2f endLinePos = Point2f(startLinePos.x + direction[0], startLinePos.y + direction[1]);
 		utils::DrawLine(startLinePos, endLinePos, 1.f);
 	}
+
+	utils::SetColor(Color4f(1.f, 1.f, 0.f, 1.f));
+	utils::DrawLine(Point2f(m_CarPointsLocalSpace[1].x,
+		m_CarPointsLocalSpace[1].y),
+		Point2f(m_CarPointsLocalSpace[1].x + m_ForwardTwoBlade[0] * 10.f,
+			m_CarPointsLocalSpace[1].y + m_ForwardTwoBlade[1] * 10.f), 3.f);
+
+	utils::DrawLine(Point2f(m_CarPointsLocalSpace[2].x,
+		m_CarPointsLocalSpace[2].y),
+		Point2f(m_CarPointsLocalSpace[2].x + m_ForwardTwoBlade[0] * 10.f,
+			m_CarPointsLocalSpace[2].y + m_ForwardTwoBlade[1] * 10.f), 3.f);
 }
 
 void RivalCar::RotateLookAt()
 {
-
 	TwoBlade normalizedForwardTwoBlade = m_ForwardTwoBlade / m_ForwardTwoBlade.VNorm();
 	m_ForwardTwoBlade = normalizedForwardTwoBlade;
 
@@ -63,7 +73,6 @@ void RivalCar::RotateLookAt()
 	ThreeBlade carMiddlePoint = ThreeBlade((m_CarPoints[0].x + m_CarPoints[2].x) / 2.f, (m_CarPoints[0].y + m_CarPoints[2].y) / 2.f, 0.f);
 	TwoBlade originToOrbitPoint = TwoBlade(carMiddlePoint[0], carMiddlePoint[1], carMiddlePoint[2], 0.f, 0.f, 0.f);
 	float distance = originToOrbitPoint.VNorm();
-
 
 	auto perpDot = forwardDirection[3] * carDirection[4] - forwardDirection[4] * carDirection[3];
 
@@ -126,9 +135,6 @@ void RivalCar::CheckIntersectionWithMapBorders(const std::vector<Border>& border
 
 				point = (commonPlane ^ border.borderDirection).Normalized();
 
-
-				
-
 				if (
 					(std::min(point1[0], point2[0]) <= point[0] && point[0] <= std::max(point1[0], point2[0]) &&
 						std::min(point1[1], point2[1]) <= point[1] && point[1] <= std::max(point1[1], point2[1]))
@@ -159,7 +165,6 @@ void RivalCar::CheckIntersectionWithMapBorders(const std::vector<Border>& border
 	}
 
 	// Find the minimum value
-
 	if (IsPossibleDirectionVectorContiguous(indicesOfPossibleDirectionArray))
 	{
 		auto minIt = std::min_element(indicesOfPossibleDirectionArray.begin(), indicesOfPossibleDirectionArray.end());
