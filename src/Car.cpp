@@ -299,6 +299,11 @@ void Car::Bounce(const ThreeBlade& hitPos, const TwoBlade& borderVector)
 	m_TimeBouncing = 0.5f;
 }
 
+Point2f Car::GetCarLocation() const
+{
+	return Point2f((m_CarPoints[0].x + m_CarPoints[2].x) / 2.f, (m_CarPoints[0].y + m_CarPoints[2].y) / 2.f);
+}
+
 ThreeBlade Car::GetCarWorldLocation() const
 {
 	return ThreeBlade(m_CarPoints[0].x, m_CarPoints[0].y, 0.f);

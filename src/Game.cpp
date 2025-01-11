@@ -250,6 +250,8 @@ void Game::Run()
 			case SDL_MOUSEBUTTONDOWN:
 			{
 				e.button.y = int(m_Window.height) - e.button.y;
+				GizmosDrawer::SetColor(Color4f(1.f, 0.f, 1.f, 1.f));
+				GizmosDrawer::DrawCircle(Point2f(float(e.button.x), float(e.button.y)), 5.f);
 
 				Point2f clickPos = m_CameraUPtr->GetWorldLocation(Point2f(float(e.button.x), float(e.button.y)));
 
@@ -374,6 +376,16 @@ void Game::Draw() const
 	utils::SetColor(Color4f(0.7f, 0.7f, 0.7f, 1.f));
 
 	utils::DrawPolygon(m_MapPointsLocalSpace);
+
+	if (m_IsDrifting)
+	{
+		utils::SetColor(Color4f(1.f, 0.7f, 1.f, 1.f));
+
+		utils::FillEllipse(m_CameraUPtr->GetAppliedTransform(Point2f(m_OrbitPoint[0], m_OrbitPoint[1])), 10.f, 10.f);
+
+		utils::DrawLine(m_CameraUPtr->GetAppliedTransform(Point2f(m_OrbitPoint[0], m_OrbitPoint[1])), m_CameraUPtr->GetAppliedTransform(m_CarUPtr->GetCarLocation()), 2.f);
+	}
+	
 
 	m_RivalCarUPtr->Draw();
 	m_RivalCar2UPtr->Draw();

@@ -100,7 +100,7 @@ void GizmosDrawer::Draw()
 {
     for (int i{}; i < static_cast<int>(m_Drawings.size()); ++i)
     {
-        // utils::SetColor(m_Drawings[i]->color);
+        utils::SetColor(m_Drawings[i]->color);
         m_Drawings[i]->Draw();
     }
     

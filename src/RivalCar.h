@@ -19,7 +19,7 @@ public:
 
 	bool IsPossibleDirectionVectorContiguous(const std::vector<int>& vec);
 
-	//bool CheckFinished(float elapsedSec )
+	//bool CheckFinished(float elapsedSec);
 	bool IsPointInRange(float px, float py,
 		float x1, float y1, float x2, float y2,
 		float x3, float y3, float x4, float y4);

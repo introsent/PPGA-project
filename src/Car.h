@@ -32,6 +32,8 @@ public:
 
 	void Bounce(const ThreeBlade& hitPos, const TwoBlade& borderVector);
 
+	Point2f GetCarLocation() const;
+
 	ThreeBlade GetCarWorldLocation() const;
 
 	float Remap(float value, float fromLow, float fromHigh, float toLow, float toHigh) {
