@@ -6,7 +6,7 @@
 class RivalCar
 {
 public:
-	RivalCar(ThreeBlade startPos, TwoBlade forwardTwoBlade, float speed);
+	RivalCar(ThreeBlade startPos, TwoBlade forwardTwoBlade, float speed, Color4f color);
 	void UpdateForwardForce(float elapsedSec);
 
 

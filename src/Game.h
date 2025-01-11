@@ -3,7 +3,9 @@
 #include "SDL.h"
 #include "SDL_opengl.h"
 #include <memory>
-
+#include <SDL.h>
+#include <SDL_opengl.h>
+#include <SDL_ttf.h>
 #include "Camera.h"
 #include "FlyFish.h"
 #include "Car.h" 
@@ -57,6 +59,7 @@ private:
 	// DATA MEMBERS
 	std::unique_ptr<Car> m_CarUPtr;
 	std::unique_ptr<RivalCar> m_RivalCarUPtr;
+	std::unique_ptr<RivalCar> m_RivalCar2UPtr;
 
 	std::unique_ptr<Camera> m_CameraUPtr;
 
@@ -70,6 +73,8 @@ private:
 
 	float m_MaxMapWidth;
 	float m_MaxMapHeight;
+
+	float m_TimerBeforeStart = 3.f;
 
 	bool m_IsDrifting = false;
 	ThreeBlade m_OrbitPoint;

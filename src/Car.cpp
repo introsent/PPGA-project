@@ -101,7 +101,7 @@ float Car::DetermineAngularVelocity(TwoBlade& radiusTwoBlade)
 	return m_Speed / radius;
 }
 
-void Car::Orbit(ThreeBlade orbitPoint)
+void Car::Orbit(ThreeBlade orbitPoint, const std::vector<Border>& bordersArray)
 {
 	if (m_TimeBouncing <= 0.f)
 	{
@@ -261,10 +261,39 @@ void Car::Bounce(const ThreeBlade& hitPos, const TwoBlade& borderVector)
 	}
 	RotateLookAt();
 
-	m_SideForceTwoBlade = m_ForwardTwoBlade;
+	float minDistance = std::numeric_limits<float>::infinity();
+	int indexOfClosestPoint = 0;
+
+	for (int curIndex{ 0 }; curIndex < m_CarPoints.size(); ++curIndex)
+	{
+		ThreeBlade position = ThreeBlade(m_CarPoints[curIndex].x, m_CarPoints[curIndex].y, 0.f);
+		float distance = (position.Normalized() & hitPos.Normalized()).Norm();
+		if (distance < minDistance)
+		{
+			minDistance = distance;
+			indexOfClosestPoint = curIndex;
+		}
+	}
+	minDistance *= 1.5f;
 	
-	auto reflector = borderVector * m_SideForceTwoBlade * ~borderVector;
-	m_SideForceTwoBlade = reflector.Grade2();
+	m_SideForceTwoBlade = m_ForwardTwoBlade;
+
+	if (m_Speed > 0.f && (indexOfClosestPoint == 0 || indexOfClosestPoint == 3))
+	{
+		m_SideForceTwoBlade = m_ForwardTwoBlade;
+	}
+	else
+	{
+		auto reflector = borderVector.Normalized() * m_SideForceTwoBlade * ~(borderVector.Normalized());
+		m_SideForceTwoBlade = reflector.Grade2();
+	}
+
+	Motor translator = Motor::Translation(minDistance, m_SideForceTwoBlade);
+	for (Point2f& pos : m_CarPoints)
+	{
+		ThreeBlade position = (translator * ThreeBlade(pos.x, pos.y, 0.f) * ~translator).Grade3();
+		pos = Point2f(position[0], position[1]);
+	}
 
 	m_TimeBouncing = 0.5f;
 }

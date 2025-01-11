@@ -2,6 +2,7 @@
 #include "FlyFish.h"
 #include "utils.h"
 #include "Camera.h"
+#include "Border.h"
 class Car
 {
 public:
@@ -19,7 +20,7 @@ public:
 	void DecreaseSpeed();
 	float DetermineAngularVelocity(TwoBlade& radiusTwoBlade);
 
-	void Orbit(ThreeBlade orbitPoint);
+	void Orbit(ThreeBlade orbitPoint, const std::vector<Border>& bordersArray);
 
 	void RotateLookAt();
 

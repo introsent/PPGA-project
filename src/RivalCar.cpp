@@ -3,11 +3,11 @@
 #include <iostream>
 #include <algorithm> 
 
-RivalCar::RivalCar(ThreeBlade startPos, TwoBlade forwardTwoBlade, float speed) : m_Position(startPos), m_ForwardTwoBlade(forwardTwoBlade), m_Speed(speed)
+RivalCar::RivalCar(ThreeBlade startPos, TwoBlade forwardTwoBlade, float speed, Color4f color) : m_Position(startPos), m_ForwardTwoBlade(forwardTwoBlade), m_Speed(speed), m_Color(color)
 {
 	m_Width = 15.f;
 	m_Height = 30.f;
-	m_Color = Color4f(0.f, 0.f, 1.f, 1.f);
+	//m_Color = Color4f(0.f, 0.f, 1.f, 1.f);
 
 	m_CarPoints.push_back(Point2f(m_Position[0], m_Position[1]));
 	m_CarPoints.push_back(Point2f(m_Position[0], m_Position[1] + m_Height));
@@ -85,8 +85,6 @@ void RivalCar::RotateLookAt()
 	{
 		rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, -1.f);
 	}
-
-	//TwoBlade rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, 1.f);
 
 	Motor rotation = Motor::Rotation(-angleBetween * 180.f / utils::g_Pi, rotationLine);
 
@@ -180,7 +178,6 @@ void RivalCar::CheckIntersectionWithMapBorders(const std::vector<Border>& border
 
 		RotateLookAt();
 	}
-	
 }
 
 void RivalCar::CalculatePossibleDirections(float startAngle)

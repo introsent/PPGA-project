@@ -106,7 +106,8 @@ void Game::InitializeGameEngine()
 	m_CarUPtr = std::make_unique<Car>(ThreeBlade(360.f, 200.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 0.f);
 
 	//m_RivalCarUPtr = std::make_unique<RivalCar>(ThreeBlade(360.f, 100.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 0.f);
-	m_RivalCarUPtr = std::make_unique<RivalCar>(ThreeBlade(340.f, 250.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 100.f);
+	m_RivalCarUPtr = std::make_unique<RivalCar>(ThreeBlade(340.f, 250.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 150.f, Color4f(0.f, 0.f, 1.f, 1.f));
+	m_RivalCar2UPtr = std::make_unique<RivalCar>(ThreeBlade(340.f, 250.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 165.f, Color4f(1.f, 0.f, 0.f, 1.f));
 
 	//Left of the road
 	m_MapPoints.emplace_back(132.f, 50.f);
@@ -176,10 +177,6 @@ void Game::InitializeGameEngine()
 		TwoBlade borderTwoBlade = TwoBlade::LineFromPoints(point1[0], point1[1], point1[2], point2[0], point2[1], point2[2]);
 
 		m_MapBorders.push_back(Border(borderTwoBlade, point1, point2));
-
-		//m_CarUPtr->CheckIntersectionWithMapBorders(borderTwoBlade, point1, point2);
-		//
-		//m_RivalCarUPtr->CheckIntersectionWithMapBorders(borderTwoBlade, point1, point2);
 	}
 
 	m_CameraUPtr = std::make_unique<Camera>(GetViewPort().width, GetViewPort().height);
@@ -193,9 +190,6 @@ void Game::InitializeGameEngine()
 		return a.y < b.y;
 		});
 	m_MaxMapHeight =  maxYPoint->y;
-
-
-
 }
 
 void Game::Run()
@@ -259,8 +253,6 @@ void Game::Run()
 				{
 					m_OrbitPoint = ThreeBlade(clickPos.x, clickPos.y, 0.f);
 				}
-
-				//m_CarUPtr->Rotate(ThreeBlade(e.button.x, e.button.y, 0.f));
 				this->ProcessMouseDownEvent(e.button);
 				break;
 			}
@@ -314,39 +306,37 @@ void Game::CleanupGameEngine()
 
 void Game::Update(float elapsedSec)
 {
-	for (int i = 0; i < m_MapPoints.size(); ++i)
+	if (m_TimerBeforeStart > 0.f)
 	{
-		ThreeBlade point1 = ThreeBlade(m_MapPoints[i % m_MapPoints.size()].x, m_MapPoints[i % m_MapPoints.size()].y, 0.f);
-		ThreeBlade point2 = ThreeBlade(m_MapPoints[(i + 1) % m_MapPoints.size()].x, m_MapPoints[(i + 1) % m_MapPoints.size()].y, 0.f);
-
-		TwoBlade borderTwoBlade = TwoBlade::LineFromPoints(point1[0], point1[1], point1[2], point2[0], point2[1], point2[2]);
-
-		m_CarUPtr->CheckIntersectionWithMapBorders(borderTwoBlade, point1, point2);
-
-		
-	}
-
-	for (const auto& border : m_MapBorders)
-	{
-		m_CarUPtr->CheckIntersectionWithMapBorders(border.borderDirection, border.startPosition, border.endPosition);
-	}
-
-	if (m_IsDrifting)
-	{
-		m_CarUPtr->Orbit(m_OrbitPoint);
-		m_CarUPtr->RotateLookAt();
-		m_CarUPtr->UpdateSideForce(elapsedSec);
+		if (int(m_TimerBeforeStart) != int(m_TimerBeforeStart - elapsedSec))
+		{
+			std::cout << int(m_TimerBeforeStart) << std::endl;
+		}
 	}
 	else
 	{
-		m_CarUPtr->UpdateSideForce(elapsedSec);
-		m_CarUPtr->UpdateForwardForce(elapsedSec);
+		for (const auto& border : m_MapBorders)
+		{
+			m_CarUPtr->CheckIntersectionWithMapBorders(border.borderDirection, border.startPosition, border.endPosition);
+		}
+
+		if (m_IsDrifting)
+		{
+			m_CarUPtr->Orbit(m_OrbitPoint, m_MapBorders);
+			m_CarUPtr->RotateLookAt();
+			m_CarUPtr->UpdateSideForce(elapsedSec);
+		}
+		else
+		{
+			m_CarUPtr->UpdateSideForce(elapsedSec);
+			m_CarUPtr->UpdateForwardForce(elapsedSec);
+		}
+
+		m_RivalCarUPtr->CheckIntersectionWithMapBorders(m_MapBorders);
+		m_RivalCarUPtr->UpdateForwardForce(elapsedSec);
 	}
 
-	m_RivalCarUPtr->CheckIntersectionWithMapBorders(m_MapBorders);
-	m_RivalCarUPtr->UpdateForwardForce(elapsedSec);
-
-	m_CameraUPtr->Aim(m_MaxMapWidth, m_MaxMapHeight, m_CarUPtr->GetCarWorldLocation());	
+	m_CameraUPtr->Aim(m_MaxMapWidth, m_MaxMapHeight, m_CarUPtr->GetCarWorldLocation());
 
 	m_CarUPtr->UpdateCarPointsLocalSpace(m_CameraUPtr.get());
 
@@ -357,7 +347,8 @@ void Game::Update(float elapsedSec)
 	{
 		m_MapPointsLocalSpace.push_back(m_CameraUPtr->GetAppliedTransform(mapPoint));
 	}
-	
+
+	m_TimerBeforeStart -= elapsedSec;
 }
 
 void Game::Draw() const
