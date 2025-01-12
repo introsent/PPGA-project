@@ -12,7 +12,6 @@ BaseCar::BaseCar(ThreeBlade startPos, TwoBlade forwardTwoBlade, float speed) : m
 
 	m_Width  = 15.f;
 	m_Height = 30.f;
-	m_Color = Color4f(0.f, Remap(speed, 0.f, 300.f, 0.2f, 1.f), 0.f, 1.f);
 
 	m_CarPointsWorldSpace.push_back({ startPos[0], startPos[1], 0.f });
 	m_CarPointsWorldSpace.push_back({ startPos[0], startPos[1] + m_Height, 0.f });
@@ -22,7 +21,10 @@ BaseCar::BaseCar(ThreeBlade startPos, TwoBlade forwardTwoBlade, float speed) : m
 
 void BaseCar::UpdateForwardForce(float elapsedSec)
 {
-	Motor forwardTranslator = Motor::Translation(m_ForwardTwoBlade[2] * elapsedSec, m_ForwardTwoBlade);
+	TwoBlade desiredForwardTwoBlade = m_ForwardTwoBlade;
+	desiredForwardTwoBlade[2] = 0;
+
+	Motor forwardTranslator = Motor::Translation(m_ForwardTwoBlade[2] * elapsedSec, desiredForwardTwoBlade);
 
 	for (ThreeBlade& worldPos : m_CarPointsWorldSpace)
 	{
@@ -79,7 +81,7 @@ bool BaseCar::IsPointInRange(float px, float py, float x1, float y1, float x2, f
 	return inRangeVec1 && inRangeVec2;
 }
 
-std::vector<Point2f> BaseCar::ConvertThreeBladeArrayToPoint2fArray(const std::vector<ThreeBlade> pointsThreeBlade) const
+std::vector<Point2f> BaseCar::ConvertThreeBladeArrayToPoint2fArray(const std::vector<ThreeBlade>& pointsThreeBlade) const
 {
 	return [&pointsThreeBlade]
 		{

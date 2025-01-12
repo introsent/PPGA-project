@@ -7,13 +7,16 @@
 
 PlayerCar::PlayerCar(ThreeBlade startPos, TwoBlade forwardTwoBlade, float speed) : BaseCar(startPos, forwardTwoBlade, speed)
 {
+	m_Color = Color4f(0.f, Remap(speed, 0.f, 300.f, 0.2f, 1.f), 0.f, 1.f);
 }
 
 void PlayerCar::UpdateSideForce(float elapsedSec)
 {
 	if (m_TimeBouncing > 0.f)
 	{
-		Motor sideTranslator = Motor::Translation(m_ForwardTwoBlade[2] * elapsedSec, m_ForwardTwoBlade);
+		TwoBlade desireSideTwoBlade = m_SideForceTwoBlade;
+		desireSideTwoBlade[2] = 0;
+		Motor sideTranslator = Motor::Translation(m_ForwardTwoBlade[2] * elapsedSec, desireSideTwoBlade);
 
 		for (ThreeBlade& worldPos : m_CarPointsWorldSpace)
 		{
@@ -45,7 +48,7 @@ void PlayerCar::IncreaseSpeed()
 
 void PlayerCar::DecreaseSpeed()
 {
-	if (m_ForwardTwoBlade[2] - 50 < -50.f) m_ForwardTwoBlade[2] -= 50.f;
+	m_ForwardTwoBlade[2] -= 50.f;
 	m_Color = Color4f(0.f, Remap(m_ForwardTwoBlade[2], 0.f, 300.f, 0.2f, 1.f), 0.f, 1.f);
 }
 
@@ -61,8 +64,8 @@ void PlayerCar::Orbit(ThreeBlade orbitPoint, const std::vector<Border>& bordersA
 	{
 		TwoBlade originToOrbitPoint = TwoBlade(orbitPoint[0], orbitPoint[1], orbitPoint[2], 0.f, 0.f, 0.f);
 		float distance = originToOrbitPoint.VNorm();
-
-		TwoBlade carToOrbitPoint = TwoBlade(m_CarPointsWorldSpace[0][0] - orbitPoint[0], m_CarPointsWorldSpace[0][1] - orbitPoint[1], 0.f, 0.f, 0.f, 0.f);
+		 
+		TwoBlade carToOrbitPoint = TwoBlade((m_CarPointsWorldSpace[0][0] + m_CarPointsWorldSpace[2][0]) / 2.f - orbitPoint[0], (m_CarPointsWorldSpace[0][1] + m_CarPointsWorldSpace[2][1]) / 2.f - orbitPoint[1], 0.f, 0.f, 0.f, 0.f);
 		float angularVelocity = DetermineAngularVelocity(carToOrbitPoint);
 		carToOrbitPoint /= carToOrbitPoint.VNorm();
 
@@ -103,15 +106,19 @@ void PlayerCar::Orbit(ThreeBlade orbitPoint, const std::vector<Border>& bordersA
 
 void PlayerCar::RotateLookAt()
 {
+	float currentSpeed = m_ForwardTwoBlade[2];
+
 	m_ForwardTwoBlade = TwoBlade(m_CarPointsWorldSpace[1][0] - m_CarPointsWorldSpace[0][0], m_CarPointsWorldSpace[1][1] - m_CarPointsWorldSpace[0][1], 0.f, 0.f, 0.f, 0.f);
 	m_ForwardTwoBlade /= m_ForwardTwoBlade.VNorm();
+
+	m_ForwardTwoBlade[2] = currentSpeed;
 }
 
 void PlayerCar::SetStartedRotating(bool isRotating)
 {
 	m_StartedRotating = isRotating;
 }
-
+	
 void PlayerCar::Snap()
 {
 	TwoBlade up =	 TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f);
@@ -160,7 +167,9 @@ void PlayerCar::Snap()
 		worldPos = (rotor * worldPos * ~rotor).Grade3();
 	}
 
+	float currentSpeed = m_ForwardTwoBlade[2];
 	m_ForwardTwoBlade = closestDirection;
+	m_ForwardTwoBlade[2] = currentSpeed;
 }
 
 

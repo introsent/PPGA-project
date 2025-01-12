@@ -8,7 +8,7 @@
 #include <SDL_ttf.h>
 #include "Camera.h"
 #include "FlyFish.h"
-#include "Car.h" 
+#include "PlayerCar.h" 
 #include "RivalCar.h"
 #include "Border.h"
 
@@ -51,13 +51,15 @@ public:
 		
 	}
 
+	Point2f ConvertThreeBladeToPoint2f(const ThreeBlade& threeBladeToConvert) const;
+
 	const Rectf& GetViewPort() const
 	{
 		return m_Viewport;
 	}
 private:
 	// DATA MEMBERS
-	std::unique_ptr<Car> m_CarUPtr;
+	std::unique_ptr<PlayerCar> m_CarUPtr;
 	std::unique_ptr<RivalCar> m_RivalCarUPtr;
 	std::unique_ptr<RivalCar> m_RivalCar2UPtr;
 

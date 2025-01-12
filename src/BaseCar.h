@@ -34,6 +34,8 @@ public:
 		float x1, float y1, float x2, float y2,
 		float x3, float y3, float x4, float y4) const;
 
+	std::vector<Point2f> ConvertThreeBladeArrayToPoint2fArray(const std::vector<ThreeBlade>& pointsThreeBlade) const;
+
 protected:
 	TwoBlade m_ForwardTwoBlade;
 
@@ -43,8 +45,5 @@ protected:
 
 	std::vector<ThreeBlade> m_CarPointsWorldSpace;
 	std::vector<ThreeBlade> m_CarPointsLocalSpace;
-
-private:
-	std::vector<Point2f> ConvertThreeBladeArrayToPoint2fArray(const std::vector<ThreeBlade> pointsThreeBlade) const;
 };
 

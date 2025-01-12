@@ -104,7 +104,7 @@ void Game::InitializeGameEngine()
 
 	m_Initialized = true;
 
-	m_CarUPtr = std::make_unique<Car>(ThreeBlade(360.f, 200.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 0.f);
+	m_CarUPtr = std::make_unique<PlayerCar>(ThreeBlade(360.f, 200.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 0.f);
 
 	//m_RivalCarUPtr = std::make_unique<RivalCar>(ThreeBlade(360.f, 100.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 0.f);
 	m_RivalCarUPtr = std::make_unique<RivalCar>(ThreeBlade(340.f, 250.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 150.f, Color4f(0.f, 0.f, 1.f, 1.f));
@@ -253,12 +253,10 @@ void Game::Run()
 				GizmosDrawer::SetColor(Color4f(1.f, 0.f, 1.f, 1.f));
 				GizmosDrawer::DrawCircle(Point2f(float(e.button.x), float(e.button.y)), 5.f);
 
-				Point2f clickPos = m_CameraUPtr->GetWorldLocation(Point2f(float(e.button.x), float(e.button.y)));
-
 				m_IsDrifting = true;
 				if (m_IsDrifting)
 				{
-					m_OrbitPoint = ThreeBlade(clickPos.x, clickPos.y, 0.f);
+					m_OrbitPoint = m_CameraUPtr->GetWorldLocation(ThreeBlade(float(e.button.x), float(e.button.y), 0.f));
 				}
 				this->ProcessMouseDownEvent(e.button);
 				break;
@@ -325,10 +323,7 @@ void Game::Update(float elapsedSec)
 	}
 	else
 	{
-		for (const auto& border : m_MapBorders)
-		{
-			m_CarUPtr->CheckIntersectionWithMapBorders(border.borderDirection, border.startPosition, border.endPosition);
-		}
+		m_CarUPtr->CheckIntersectionWithMapBorders(m_MapBorders);
 
 		if (m_IsDrifting)
 		{
@@ -350,7 +345,7 @@ void Game::Update(float elapsedSec)
 		
 	}
 
-	m_CameraUPtr->Aim(m_MaxMapWidth, m_MaxMapHeight, m_CarUPtr->GetCarWorldLocation());
+	m_CameraUPtr->Aim(m_MaxMapWidth, m_MaxMapHeight, m_CarUPtr->GetCarLocationWorldSpace());
 
 	m_CarUPtr->UpdateCarPointsLocalSpace(m_CameraUPtr.get());
 
@@ -360,7 +355,8 @@ void Game::Update(float elapsedSec)
 	m_MapPointsLocalSpace.clear();
 	for (const Point2f& mapPoint : m_MapPoints)
 	{
-		m_MapPointsLocalSpace.push_back(m_CameraUPtr->GetAppliedTransform(mapPoint));
+		ThreeBlade mapPointLocalSpace = m_CameraUPtr->GetAppliedTransform(ThreeBlade(mapPoint.x, mapPoint.y, 0.f));
+		m_MapPointsLocalSpace.push_back(Point2f(mapPointLocalSpace[0], mapPointLocalSpace[1]));
 	}
 
 	m_TimerBeforeStart -= elapsedSec;
@@ -381,9 +377,9 @@ void Game::Draw() const
 	{
 		utils::SetColor(Color4f(1.f, 0.7f, 1.f, 1.f));
 
-		utils::FillEllipse(m_CameraUPtr->GetAppliedTransform(Point2f(m_OrbitPoint[0], m_OrbitPoint[1])), 10.f, 10.f);
+		utils::FillEllipse(ConvertThreeBladeToPoint2f(m_CameraUPtr->GetAppliedTransform(m_OrbitPoint)), 10.f, 10.f);
 
-		utils::DrawLine(m_CameraUPtr->GetAppliedTransform(Point2f(m_OrbitPoint[0], m_OrbitPoint[1])), m_CameraUPtr->GetAppliedTransform(m_CarUPtr->GetCarLocation()), 2.f);
+		utils::DrawLine(ConvertThreeBladeToPoint2f(m_CameraUPtr->GetAppliedTransform(m_OrbitPoint)), ConvertThreeBladeToPoint2f(m_CameraUPtr->GetAppliedTransform(m_CarUPtr->GetCarLocationWorldSpace())), 2.f);
 	}
 	
 
@@ -391,4 +387,9 @@ void Game::Draw() const
 	m_RivalCar2UPtr->Draw();
 
 	GizmosDrawer::Draw();
+}
+
+Point2f Game::ConvertThreeBladeToPoint2f(const ThreeBlade& threeBladeToConvert) const
+{
+	return Point2f(threeBladeToConvert[0], threeBladeToConvert[1]);
 }
