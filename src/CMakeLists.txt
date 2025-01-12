@@ -21,6 +21,8 @@ add_executable(GEOAProject
     "Border.h"
     "GizmosDrawer.cpp"
     "GizmosDrawer.h"
+    "BaseCar.cpp"
+    "BaseCar.h"
 )
 
 if(CMAKE_VERSION VERSION_GREATER 3.12)

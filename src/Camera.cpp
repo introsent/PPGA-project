@@ -1,5 +1,6 @@
 #include "Camera.h"
 #include <stack>
+#include "FlyFish.h"
 Camera::Camera(float screenWidth, float screenHeight)
 {
 	m_ScreenWidth = screenWidth;
@@ -8,81 +9,31 @@ Camera::Camera(float screenWidth, float screenHeight)
 	m_FinalTransform = Motor(0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f);
 }
 
-Point2f Camera::GetAppliedTransform(const Point2f& pointToTransform) const
+ThreeBlade Camera::GetAppliedTransform(const ThreeBlade& pointToTransform) const
 {
-	ThreeBlade newPoint = (m_FinalTransform * ThreeBlade(pointToTransform.x, pointToTransform.y, 0.f) * ~m_FinalTransform).Grade3();
+	ThreeBlade transformedPoint = (m_FinalTransform * pointToTransform * ~m_FinalTransform).Grade3();
 
 	float x, y;
+	x = std::isnan(transformedPoint[0]) ? pointToTransform[0] : transformedPoint[0];
+	y = std::isnan(transformedPoint[1]) ? pointToTransform[1] : transformedPoint[1];
 
-	if (!std::isnan(newPoint[0]))
-	{
-		x = newPoint[0];
-	}
-	else
-	{
-		x = pointToTransform.x;
-	}
-
-	if (!std::isnan(newPoint[1]))
-	{
-		y = newPoint[1];
-	}
-	else
-	{
-		y = pointToTransform.y;
-	}
-
-	return Point2f(x, y);
+	return ThreeBlade(x, y, 0.f);
 }
 
-Point2f Camera::GetWorldLocation(const Point2f& pointInLocalSpace) const
+ThreeBlade Camera::GetWorldLocation(const ThreeBlade& pointInLocalSpace) const
 {
 	float transformX, transformY;
-
-	if (!std::isnan(m_FinalTransform[1])) //m_FinalTransform[1] != m_FinalTransform[1]))
-	{
-		transformX = m_FinalTransform[1];
-	}
-	else
-	{
-		transformX = 0.f;
-	}
-
-	if (!std::isnan(m_FinalTransform[2]))
-	{
-		transformY = m_FinalTransform[2];
-	}
-	else
-	{
-		transformY = 0.f;
-	}
+	transformX = std::isnan(m_FinalTransform[1]) ? 0.f : m_FinalTransform[1];
+	transformY = std::isnan(m_FinalTransform[2]) ? 0.f : m_FinalTransform[2];
 
 	Motor translation = Motor(m_FinalTransform[0], -transformX, -transformY, m_FinalTransform[3], m_FinalTransform[4], m_FinalTransform[5], m_FinalTransform[6], m_FinalTransform[7]);
-
-	ThreeBlade result = (translation * ThreeBlade(pointInLocalSpace.x, pointInLocalSpace.y, 0.f) * ~translation).Grade3();
-
+	ThreeBlade result = (translation * pointInLocalSpace * ~translation).Grade3();
 
 	float x, y;
+	x = std::isnan(result[0]) ? pointInLocalSpace[0] : result[0];
+	y = std::isnan(result[1]) ? pointInLocalSpace[1] : result[1];
 
-
-	if (!std::isnan(result[0]))
-	{
-		x = result[0];
-	}
-	else
-	{
-		x = pointInLocalSpace.x;
-	}
-
-	if (!std::isnan(result[1]))
-	{
-		y = result[1];
-	}
-	else
-	{
-		y = pointInLocalSpace.y;
-	}
-	return Point2f(x, y);
+	return ThreeBlade(x, y, 0.f);
 }
 
 void Camera::Aim(float levelW, float levelH, ThreeBlade trackCenter)
@@ -98,8 +49,6 @@ void Camera::Aim(float levelW, float levelH, ThreeBlade trackCenter)
 
 	TwoBlade cameraTranslationVector = TwoBlade(-cameraX, -cameraY, 0.f, 0.f, 0.f, 0.f);
 	m_FinalTransform = Motor::Translation(cameraTranslationVector.VNorm(), cameraTranslationVector);
-
-
 }
 
 void Camera::Reset()
