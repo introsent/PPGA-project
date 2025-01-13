@@ -22,12 +22,7 @@ ThreeBlade Camera::GetAppliedTransform(const ThreeBlade& pointToTransform) const
 
 ThreeBlade Camera::GetWorldLocation(const ThreeBlade& pointInLocalSpace) const
 {
-	float transformX, transformY;
-	transformX = std::isnan(m_FinalTransform[1]) ? 0.f : m_FinalTransform[1];
-	transformY = std::isnan(m_FinalTransform[2]) ? 0.f : m_FinalTransform[2];
-
-	Motor translation = Motor(m_FinalTransform[0], -transformX, -transformY, m_FinalTransform[3], m_FinalTransform[4], m_FinalTransform[5], m_FinalTransform[6], m_FinalTransform[7]);
-	ThreeBlade result = (translation * pointInLocalSpace * ~translation).Grade3();
+	ThreeBlade result = (~m_FinalTransform * pointInLocalSpace * m_FinalTransform).Grade3();
 
 	float x, y;
 	x = std::isnan(result[0]) ? pointInLocalSpace[0] : result[0];

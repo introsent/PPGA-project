@@ -9,10 +9,6 @@ public:
 	Camera& operator=(const Camera& rhs) = default;
 	Camera(const Camera& other) = default;
 
-
-	//void PushMatrix();
-	//void PopMatrix(); 
-
 	ThreeBlade GetAppliedTransform(const ThreeBlade& pointToTransform) const;
 	ThreeBlade GetWorldLocation(const ThreeBlade& pointInLocalSpace) const;
 	//const Motor& GetCurrentTransformation() const;
