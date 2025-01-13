@@ -36,6 +36,9 @@ public:
 
 	std::vector<Point2f> ConvertThreeBladeArrayToPoint2fArray(const std::vector<ThreeBlade>& pointsThreeBlade) const;
 
+	void CheckForTheCompletion(const Border& lastBorder, float completionTime);
+	bool GetIsRaceCompleted() const;
+
 protected:
 	TwoBlade m_ForwardTwoBlade;
 
@@ -45,5 +48,7 @@ protected:
 
 	std::vector<ThreeBlade> m_CarPointsWorldSpace;
 	std::vector<ThreeBlade> m_CarPointsLocalSpace;
+
+	bool m_IsRaceCompleted = false;
 };
 

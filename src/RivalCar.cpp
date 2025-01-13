@@ -92,8 +92,11 @@ void RivalCar::CheckIntersectionWithMapBorders(const std::vector<Border>& border
 		TwoBlade curTwoBladeNoVanishing = ThreeBlade(curTwoBlade[3], curTwoBlade[4], curTwoBlade[5]) & ThreeBlade(0.f, 0.f, 0.f);
 
 		bool isPossible = true;
-		for (const auto& border : bordersArray)
+		for (int index{ 0 }; index < bordersArray.size(); ++index)
 		{
+			if (index == 23) continue;
+			Border border = bordersArray[index];
+
 			TwoBlade borderTwoBladeNoVanishing = ThreeBlade(border.borderDirection[3], border.borderDirection[4], border.borderDirection[5]) & ThreeBlade(0.f, 0.f, 0.f);
 			ThreeBlade skewTest = (curTwoBladeNoVanishing ^ borderTwoBladeNoVanishing).Grade3();
 
@@ -106,14 +109,14 @@ void RivalCar::CheckIntersectionWithMapBorders(const std::vector<Border>& border
 				OneBlade commonPlane = NPoint & curTwoBlade.Normalized();
 
 				point = (commonPlane ^ border.borderDirection).Normalize();
-				
+
 				// Check bounds
-				if (IsPointInRange(point[0], point[1], 
-					point1[0], point1[1], 
-					point2[0], point2[1], 
-					border.startPosition[0], border.startPosition[1], 
+				if (IsPointInRange(point[0], point[1],
+					point1[0], point1[1],
+					point2[0], point2[1],
+					border.startPosition[0], border.startPosition[1],
 					border.endPosition[0], border.endPosition[1]))
-		
+
 				{
 					isPossible = false;
 					break;

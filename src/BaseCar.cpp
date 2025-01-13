@@ -94,6 +94,50 @@ std::vector<Point2f> BaseCar::ConvertThreeBladeArrayToPoint2fArray(const std::ve
 		}();
 }
 
+void BaseCar::CheckForTheCompletion(const Border& lastBorder, float completionTime)
+{
+	for (int i = 0; i < m_CarPointsWorldSpace.size(); ++i)
+	{
+		ThreeBlade point1 = m_CarPointsWorldSpace[i % m_CarPointsWorldSpace.size()];
+		ThreeBlade point2 = m_CarPointsWorldSpace[(i + 1) % m_CarPointsWorldSpace.size()];
+
+		TwoBlade curTwoBlade = TwoBlade::LineFromPoints(point1[0], point1[1], point1[2], point2[0], point2[1], point2[2]);
+
+		TwoBlade curTwoBladeNoVanishing = !curTwoBlade;
+		TwoBlade borderTwoBladeNoVanishing = !lastBorder.borderDirection;
+
+		ThreeBlade skewTest = (curTwoBladeNoVanishing ^ borderTwoBladeNoVanishing).Grade3();
+
+		ThreeBlade point;
+
+		if (skewTest == ThreeBlade(0.f, 0.f, 0.f, 0.f))
+		{
+			TwoBlade commonNormal = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, 1.f);
+			ThreeBlade NPoint = commonNormal ^ OneBlade::OneBlade(1.f, 0.f, 0.f, 0.f);
+			OneBlade commonPlane = NPoint & curTwoBlade;
+
+			point = (commonPlane ^ lastBorder.borderDirection).Normalize();
+		}
+
+		if (IsPointInRange(point[0], point[1],
+			point1[0], point1[1],
+			point2[0], point2[1],
+			lastBorder.startPosition[0], lastBorder.startPosition[1],
+			lastBorder.endPosition[0], lastBorder.endPosition[1])
+			)
+		{
+			m_IsRaceCompleted = true;
+			std::cout << "Race completed with time: " << std::to_string(completionTime) << " s\n";
+			break;
+		}
+	}
+}
+
+bool BaseCar::GetIsRaceCompleted() const
+{
+	return m_IsRaceCompleted;
+}
+
 ThreeBlade BaseCar::GetCarLocationLocalSpace() const
 {
 	return { (m_CarPointsLocalSpace[0][0] + m_CarPointsLocalSpace[2][0]) / 2.f,

@@ -154,20 +154,6 @@ void PlayerCar::Snap()
 		rotationLine = -planeNormal;
 	}
 
-
-	//Perpendicular dot
-	//auto perpDot = m_ForwardTwoBlade[0] * closestDirection[1] - m_ForwardTwoBlade[1] * closestDirection[0];
-	//
-	//TwoBlade rotationLine;
-	//if (perpDot > 0)
-	//{
-	//	rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, 1.f);
-	//}
-	//else if (perpDot < 0)
-	//{
-	//	rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, -1.f);
-	//}
-
 	float rotationAngle = acosf(maxDot) * 180.f / float(std::numbers::pi);
 	Motor rotation = Motor::Rotation(rotationAngle, rotationLine);
 
@@ -198,8 +184,6 @@ void PlayerCar::CheckIntersectionWithMapBorders(const std::vector<Border>& borde
 		{ 
 			ThreeBlade point1 = m_CarPointsWorldSpace[i % m_CarPointsWorldSpace.size()];
 			ThreeBlade point2 = m_CarPointsWorldSpace[(i + 1) % m_CarPointsWorldSpace.size()];
-			//ThreeBlade point1 = ThreeBlade(m_CarPointsWorldSpace[i % m_CarPointsWorldSpace.size()][0], m_CarPointsWorldSpace[i % m_CarPointsWorldSpace.size()][1], 0.f);
-			//ThreeBlade point2 = ThreeBlade(m_CarPointsWorldSpace[(i + 1) % m_CarPointsWorldSpace.size()][0], m_CarPointsWorldSpace[(i + 1) % m_CarPointsWorldSpace.size()][1], 0.f);
 
 			TwoBlade curTwoBlade = TwoBlade::LineFromPoints(point1[0], point1[1], point1[2], point2[0], point2[1], point2[2]);
 

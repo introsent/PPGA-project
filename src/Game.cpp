@@ -106,9 +106,8 @@ void Game::InitializeGameEngine()
 
 	m_CarUPtr = std::make_unique<PlayerCar>(ThreeBlade(360.f, 200.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 0.f);
 
-	//m_RivalCarUPtr = std::make_unique<RivalCar>(ThreeBlade(360.f, 100.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 0.f);
-	m_RivalCarUPtr = std::make_unique<RivalCar>(ThreeBlade(340.f, 250.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 150.f, Color4f(0.f, 0.f, 1.f, 1.f));
-	m_RivalCar2UPtr = std::make_unique<RivalCar>(ThreeBlade(340.f, 150.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 165.f, Color4f(1.f, 0.f, 0.f, 1.f));
+	m_RivalCarUPtr = std::make_unique<RivalCar>(ThreeBlade(340.f, 250.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 175.f, Color4f(0.f, 0.f, 1.f, 1.f));
+	m_RivalCar2UPtr = std::make_unique<RivalCar>(ThreeBlade(340.f, 150.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 200.f, Color4f(1.f, 0.f, 0.f, 1.f));
 
 	//Left of the road
 	m_MapPoints.emplace_back(132.f, 50.f);
@@ -230,6 +229,19 @@ void Game::Run()
 				{
 					m_CarUPtr->Snap();
 				}
+
+				if (e.key.keysym.sym == SDLK_r)
+				{
+					m_CarUPtr.release();
+					m_RivalCarUPtr.release();
+					m_RivalCar2UPtr.release();
+
+					m_CarUPtr = std::make_unique<PlayerCar>(ThreeBlade(360.f, 200.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 0.f);
+					m_RivalCarUPtr = std::make_unique<RivalCar>(ThreeBlade(340.f, 250.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 175.f, Color4f(0.f, 0.f, 1.f, 1.f));
+					m_RivalCar2UPtr = std::make_unique<RivalCar>(ThreeBlade(340.f, 150.f, 0.f), TwoBlade(0.f, 1.f, 0.f, 0.f, 0.f, 0.f), 200.f, Color4f(1.f, 0.f, 0.f, 1.f));
+
+					m_TimerBeforeStart = 3.f;
+				}
 				this->ProcessKeyDownEvent(e.key);
 				break;
 			case SDL_KEYUP:
@@ -323,26 +335,37 @@ void Game::Update(float elapsedSec)
 	}
 	else
 	{
-		m_CarUPtr->CheckIntersectionWithMapBorders(m_MapBorders);
-
-		if (m_IsDrifting)
+		if (!m_CarUPtr->GetIsRaceCompleted())
 		{
-			m_CarUPtr->Orbit(m_OrbitPoint, m_MapBorders);
-			m_CarUPtr->RotateLookAt();
-			m_CarUPtr->UpdateSideForce(elapsedSec);
-		}
-		else
-		{
-			m_CarUPtr->UpdateSideForce(elapsedSec);
-			m_CarUPtr->UpdateForwardForce(elapsedSec);
-		}
+			m_CarUPtr->CheckForTheCompletion(m_MapBorders[23], -m_TimerBeforeStart);
+			m_CarUPtr->CheckIntersectionWithMapBorders(m_MapBorders);
 
-		m_RivalCarUPtr->CheckIntersectionWithMapBorders(m_MapBorders);
-		m_RivalCarUPtr->UpdateForwardForce(elapsedSec);
+			if (m_IsDrifting)
+			{
+				m_CarUPtr->Orbit(m_OrbitPoint, m_MapBorders);
+				m_CarUPtr->RotateLookAt();
+				m_CarUPtr->UpdateSideForce(elapsedSec);
+			}
+			else
+			{
+				m_CarUPtr->UpdateSideForce(elapsedSec);
+				m_CarUPtr->UpdateForwardForce(elapsedSec);
+			}
+		}
 		
-		m_RivalCar2UPtr->CheckIntersectionWithMapBorders(m_MapBorders);
-		m_RivalCar2UPtr->UpdateForwardForce(elapsedSec);
-		
+		if (!m_RivalCarUPtr->GetIsRaceCompleted())
+		{
+			m_RivalCarUPtr->CheckForTheCompletion(m_MapBorders[23], -m_TimerBeforeStart);
+			m_RivalCarUPtr->CheckIntersectionWithMapBorders(m_MapBorders);
+			m_RivalCarUPtr->UpdateForwardForce(elapsedSec);
+		}
+	
+		if (!m_RivalCar2UPtr->GetIsRaceCompleted())
+		{
+			m_RivalCar2UPtr->CheckForTheCompletion(m_MapBorders[23], -m_TimerBeforeStart);
+			m_RivalCar2UPtr->CheckIntersectionWithMapBorders(m_MapBorders);
+			m_RivalCar2UPtr->UpdateForwardForce(elapsedSec);
+		}
 	}
 
 	m_CameraUPtr->Aim(m_MaxMapWidth, m_MaxMapHeight, m_CarUPtr->GetCarLocationWorldSpace());
