@@ -43,19 +43,23 @@ void RivalCar::RotateLookAt()
 	TwoBlade originToOrbitPoint = TwoBlade(carMiddlePoint[0], carMiddlePoint[1], carMiddlePoint[2], 0.f, 0.f, 0.f);
 	float distance = originToOrbitPoint.VNorm();
 
-	auto perpDot = forwardDirection[3] * carDirection[4] - forwardDirection[4] * carDirection[3];
+
+	TwoBlade planeNormal = TwoBlade(0, 0, 0, 0, 0, 1);
+	TwoBlade carSideTwoBlade = (planeNormal * forwardDirection).Grade2(); //Cross between norm of plane and line to find a line perpendicular to m_ForwardTwoBlade
+
+	float dotProduct = carSideTwoBlade | carDirection;
 
 	TwoBlade rotationLine;
-	if (perpDot > 0)
+	if (dotProduct > 0)
 	{
-		rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, 1.f);
+		rotationLine = -planeNormal;
 	}
-	else if (perpDot <= 0)
+	else if (dotProduct <= 0)
 	{
-		rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, -1.f);
+		rotationLine = planeNormal;
 	}
 
-	Motor rotation = Motor::Rotation(-angleBetween * 180.f / utils::g_Pi, rotationLine);
+	Motor rotation = Motor::Rotation(angleBetween * 180.f / utils::g_Pi, rotationLine);
 
 	Motor translator = Motor::Translation(distance, originToOrbitPoint);
 
@@ -78,7 +82,7 @@ void RivalCar::CheckIntersectionWithMapBorders(const std::vector<Border>& border
 	std::vector<int> indicesOfPossibleDirectionArray;
 
 	ThreeBlade point1 = ThreeBlade((m_CarPointsWorldSpace[0] + m_CarPointsWorldSpace[2]) / 2.f);
-	//ThreeBlade point1 = ThreeBlade((m_CarPointsWorldSpace[0] + m_CarPoints[2].x) / 2.f, (m_CarPoints[0].y + m_CarPoints[2].y) / 2.f, 0.f);
+
 	int currentInteration = 0;
 	for (const auto& direction : m_PossibleDirections)
 	{

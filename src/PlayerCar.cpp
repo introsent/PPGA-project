@@ -81,7 +81,7 @@ void PlayerCar::Orbit(ThreeBlade orbitPoint, const std::vector<Border>& bordersA
 			{
 				rotationLine = -planeNormal;
 			}
-			else if (dotProduct < 0)
+			else if (dotProduct <= 0)
 			{
 				rotationLine = planeNormal;
 			}
@@ -101,9 +101,8 @@ void PlayerCar::Orbit(ThreeBlade orbitPoint, const std::vector<Border>& bordersA
 			worldPos = (rotor * worldPos * ~rotor).Grade3();
 		}
 	}
-	
-	
 }
+	
 
 void PlayerCar::RotateLookAt()
 {
@@ -133,25 +132,41 @@ void PlayerCar::Snap()
 	TwoBlade closestDirection = directions[0];
 
 	for (const auto& direction : directions) {
-		float dotProduct = m_ForwardTwoBlade[0] * direction[0] + m_ForwardTwoBlade[1] * direction[1];
+		float dotProduct = (!direction | !m_ForwardTwoBlade);
 		if (dotProduct > maxDot) {
 			maxDot = dotProduct;
 			closestDirection = direction;
 		}
 	}
 
-	//Perpendicular dot
-	auto perpDot = m_ForwardTwoBlade[0] * closestDirection[1] - m_ForwardTwoBlade[1] * closestDirection[0];
+	TwoBlade planeNormal = TwoBlade(0, 0, 0, 0, 0, 1);
+	TwoBlade carSideTwoBlade = (!m_ForwardTwoBlade * planeNormal).Grade2(); //Cross between norm of plane and line to find a line perpendicular to m_ForwardTwoBlade
+
+	float dotProduct = carSideTwoBlade | !closestDirection;
 
 	TwoBlade rotationLine;
-	if (perpDot > 0)
+	if (dotProduct > 0)
 	{
-		rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, 1.f);
+		rotationLine = planeNormal;
 	}
-	else if (perpDot < 0)
+	else if (dotProduct <= 0)
 	{
-		rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, -1.f);
+		rotationLine = -planeNormal;
 	}
+
+
+	//Perpendicular dot
+	//auto perpDot = m_ForwardTwoBlade[0] * closestDirection[1] - m_ForwardTwoBlade[1] * closestDirection[0];
+	//
+	//TwoBlade rotationLine;
+	//if (perpDot > 0)
+	//{
+	//	rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, 1.f);
+	//}
+	//else if (perpDot < 0)
+	//{
+	//	rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, -1.f);
+	//}
 
 	float rotationAngle = acosf(maxDot) * 180.f / float(std::numbers::pi);
 	Motor rotation = Motor::Rotation(rotationAngle, rotationLine);
@@ -169,7 +184,7 @@ void PlayerCar::Snap()
 	}
 
 	float currentSpeed = m_ForwardTwoBlade[2];
-	m_ForwardTwoBlade = closestDirection;
+	m_ForwardTwoBlade = -closestDirection;
 	m_ForwardTwoBlade[2] = currentSpeed;
 }
 
@@ -188,8 +203,8 @@ void PlayerCar::CheckIntersectionWithMapBorders(const std::vector<Border>& borde
 
 			TwoBlade curTwoBlade = TwoBlade::LineFromPoints(point1[0], point1[1], point1[2], point2[0], point2[1], point2[2]);
 
-			TwoBlade curTwoBladeNoVanishing = ThreeBlade(curTwoBlade[3], curTwoBlade[4], curTwoBlade[5]) & ThreeBlade(0.f, 0.f, 0.f);
-			TwoBlade borderTwoBladeNoVanishing = ThreeBlade(border.borderDirection[3], border.borderDirection[4], border.borderDirection[5]) & ThreeBlade(0.f, 0.f, 0.f);
+			TwoBlade curTwoBladeNoVanishing  = !curTwoBlade;
+			TwoBlade borderTwoBladeNoVanishing = !border.borderDirection;
 
 			ThreeBlade skewTest = (curTwoBladeNoVanishing ^ borderTwoBladeNoVanishing).Grade3();
 
