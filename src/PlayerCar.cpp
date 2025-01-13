@@ -69,20 +69,21 @@ void PlayerCar::Orbit(ThreeBlade orbitPoint, const std::vector<Border>& bordersA
 		float angularVelocity = DetermineAngularVelocity(carToOrbitPoint);
 		carToOrbitPoint /= carToOrbitPoint.VNorm();
 
-		//Perpendicular dot
-		auto perpDot = m_ForwardTwoBlade[0] * carToOrbitPoint[1] - m_ForwardTwoBlade[1] * carToOrbitPoint[0];
+		TwoBlade planeNormal = TwoBlade(0, 0, 0, 0, 0, 1);
+		TwoBlade carSideTwoBlade = (planeNormal * !m_ForwardTwoBlade).Grade2(); //Cross between norm of plane and line to find a line perpendicular to m_ForwardTwoBlade
 
+		float dotProduct = carSideTwoBlade | !carToOrbitPoint;
 
 		if (!m_StartedRotating)
 		{
 			TwoBlade rotationLine;
-			if (perpDot > 0)
+			if (dotProduct > 0)
 			{
-				rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, -1.f);
+				rotationLine = -planeNormal;
 			}
-			else if (perpDot < 0)
+			else if (dotProduct < 0)
 			{
-				rotationLine = TwoBlade(0.f, 0.f, 0.f, 0.f, 0.f, 1.f);
+				rotationLine = planeNormal;
 			}
 
 			m_LineToOrbitAround = rotationLine;
@@ -179,7 +180,7 @@ void PlayerCar::CheckIntersectionWithMapBorders(const std::vector<Border>& borde
 	for (const auto& border : bordersArray)
 	{
 		for (int i = 0; i < m_CarPointsWorldSpace.size(); ++i)
-		{
+		{ 
 			ThreeBlade point1 = m_CarPointsWorldSpace[i % m_CarPointsWorldSpace.size()];
 			ThreeBlade point2 = m_CarPointsWorldSpace[(i + 1) % m_CarPointsWorldSpace.size()];
 			//ThreeBlade point1 = ThreeBlade(m_CarPointsWorldSpace[i % m_CarPointsWorldSpace.size()][0], m_CarPointsWorldSpace[i % m_CarPointsWorldSpace.size()][1], 0.f);
